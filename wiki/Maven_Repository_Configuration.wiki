@@ -16,7 +16,7 @@ Make sure to update the *version* to the latest released version (_or snapshot v
 {{{
 
          <plugin>
-             <groupId>com.savage7.maven</groupId>
+             <groupId>com.savage7.maven.plugins</groupId>
              <artifactId>maven-external-dependency-plugin</artifactId>
              <version>0.1-SNAPSHOT</version>
              <inherited>false</inherited>                

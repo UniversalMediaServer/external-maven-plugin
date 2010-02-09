@@ -1,0 +1,42 @@
+#summary Public Maven Repository.
+#labels Featured,Phase-Implementation,Phase-Deploy
+
+= Introduction =
+
+This project is hosted in the following public M2 repository:<BR>
+
+http://oss.sonatype.org/content/groups/public
+
+= Details =
+
+Use the following *groupId* and *artifactId* when defining the plugin definition.
+Make sure to update the *version* to the latest released version (_or snapshot version if you roll that way_).
+
+{{{
+
+         <plugin>
+             <groupId>com.savage7.maven</groupId>
+             <artifactId>maven-external-dependency-plugin</artifactId>
+             <version>0.1-SNAPSHOT</version>
+             <inherited>false</inherited>                
+
+}}}
+
+Add the following *pluginRepository* definition to your *pluginRepositories* section.  
+
+{{{
+
+  <!--  MAVEN PLUGIN REPOSITORIES  -->
+ 
+  <pluginRepositories>
+
+      <pluginRepository>
+          <id>ossrh</id>
+          <name>Sonatype OSS Repository</name>
+          <url>http://oss.sonatype.org/content/groups/public</url>
+          <layout>default</layout>
+      </pluginRepository>
+
+  </pluginRepositories>  
+
+}}}

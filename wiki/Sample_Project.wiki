@@ -10,9 +10,11 @@ A complete sample project is provided to demonstrate the use of this plugin.
 You can use Subversion to checkout the test project from this URL:<BR>
 http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/
 
-<BR>
 
 == Web Access ==
 
 Or you can view the test project source in your browser using this URL:<BR>
 http://code.google.com/p/maven-external-dependency-plugin/source/browse/#svn/trunk/maven-external-dependency-plugin-test
+
+<BR>
+<BR>

@@ -41,3 +41,8 @@ Add the following *pluginRepository* definition to your *pluginRepositories* sec
   </pluginRepositories>  
 
 }}}
+
+----
+
+Please visit this link for a complete example of a POM file configured for this this plugin: <BR> 
+http://code.google.com/p/maven-external-dependency-plugin/source/browse/trunk/maven-external-dependency-plugin-test/pom.xml

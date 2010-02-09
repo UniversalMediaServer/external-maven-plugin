@@ -6,6 +6,7 @@
 This project is hosted in the following public M2 repository:<BR>
 
 http://oss.sonatype.org/content/groups/public
+<BR>
 
 = Details =
 

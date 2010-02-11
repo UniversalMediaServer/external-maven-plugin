@@ -5,30 +5,30 @@
 
 The 'maven-external-dependency-plugin' Maven plugin supports the following goals
 
-  *clean-external
-  *resolve-external
-  *install-external
-  *deploy-external
+  * clean-external
+  * resolve-external
+  * install-external
+  * deploy-external
 
 Please see each goal definition below for more details.
+<BR>
+----
 
-= Details =
+= Goals =
 
 ==clean-external==
 This goal will delete any staged artifact files that were previously downloaded.
-----
+
 ==resolve-external==
 This goal will attempt to resolve the configured artifact items.  If the artifact can be resolved in the local or one of the configured remote Maven repositories then no further action is taken.  If the artifact can not be resolved in the local or one of the configured remote Maven repositories then this plugin will download the file using the provided <downloadUrl> property and saved it to the configured staging directory.  
 
 (_Note: if the artifact item is configured with a MD5 or SHA1 checksum value, this goal will validate the checksum before staging the file.  If the checksum validation fails, the build will be terminated._)
 
-----
 ==install-external==
 This goal will first attempt to resolve the configured artifact items in the local Maven repository.  If the artifact item cannot be resolved, then it will look into the staging directory for a downloaded file.  If a staged file for the artifact is found it will install that file into the local Maven repository.  
 
 (_Note: if the artifact item is configured with a MD5 or SHA1 checksum value, this goal will validate the checksum before installing the staged the file.  If the checksum validation fails, the build will be terminated._)
 
-----
 ==deploy-external==
 This goal will first attempt to resolve the configured artifact items in the local Maven repository.  If the artifact item is found in the local Maven repository it will then deploy that artifact to the configured distribution (remote) repository.
 
@@ -73,3 +73,7 @@ In this example, a _clean-external_ is performed anytime the standard "clean" ph
 	 </execution>
  </executions>
 }}}
+
+----
+Please visit this link for a complete example of a POM file configured for this this plugin: 
+http://code.google.com/p/maven-external-dependency-plugin/source/browse/trunk/maven-external-dependency-plugin-test/pom.xml

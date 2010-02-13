@@ -1,4 +1,4 @@
-#summary Extract the necessary artifact by named from inside the downloaded file.
+#summary Extract the artifact by name from inside downloaded ZIP file.
 #labels Phase-Implementation,Phase-Deploy
 
 = Details =

@@ -1,0 +1,29 @@
+#summary Install / Deploy file local file rather than download file from URL
+#labels Phase-Implementation,Phase-Deploy
+
+= Details =
+
+If you need to resolve, install, and deploy an artifact that is located on your local file system rather than downloading a file from a website, you can use the file protocol syntax to specify a file on the local filesystem.  
+<BR>
+{{{
+file:///C:/install/google-api-translate-java/0.92/google-api-translate-java.jar
+}}}
+<BR>See the artifact item example below: 
+{{{
+
+<!-- THIS JAR IS HOSTED ON GOOGLE CODE, 
+     BUT IS NOT AVAILABLE IN A MAVEN REPO -->
+<artifactItem>
+    <groupId>com.google.code</groupId>
+    <artifactId>google-api-translate-java</artifactId>
+    <version>0.92</version>
+    <packaging>jar</packaging>
+    <downloadUrl>
+        file:///C:/install/google-api-translate-java/0.92/google-api-translate-java.jar
+    </downloadUrl>                        
+</artifactItem>
+
+}}}
+
+
+----

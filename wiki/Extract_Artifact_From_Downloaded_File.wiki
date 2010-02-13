@@ -3,10 +3,10 @@
 
 = Details =
 
-If you need to resolve, install, and deploy an artifact that is located inside a compressed ZIP file then specify the ZIP file as the download URL and then include the *extractFile* property on the *artifactItem*.   
+If you need to resolve, install, and deploy an artifact that is located inside a compressed ZIP file then specify the ZIP file as the download URL and then include the *< extractFile >* property on the *< artifactItem >*.   
 <BR>
 <BR>
-The *extractFile* property should be the name of the file (_exact match, case-sensitive_) inside the ZIP file.  If the file to extract is nested inside one or more folders in the ZIP file, then specify the full path and file name. (ie. root/parent/file.ext)  
+The *< extractFile >* property should be the name of the file (_exact match, case-sensitive_) inside the ZIP file.  If the file to extract is nested inside one or more folders in the ZIP file, then specify the full path and file name. (ie. root/parent/file.ext)  
 <BR>
 <BR>
 See the artifact item example below: 

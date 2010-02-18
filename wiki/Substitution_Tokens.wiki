@@ -7,7 +7,7 @@
 || {groupId} || The artifact's group ID specified in <groupId>  ||
 || {artifactId} || The artifact's group ID specified in <artifactId> ||
 || {version} ||  The artifact's version specified in <version> ||
-|| {_version} || The artifact's version specified in <version> with the period characters replaced with underscores ||
+|| {`_`version} || The artifact's version specified in <version> with the period characters replaced with underscores ||
 || {packaging} || The artifact's packaging specified in <packaging> if one was specified ||
 || {classifier} || The artifact's classifier specified in <classifier> if one was specified ||
 

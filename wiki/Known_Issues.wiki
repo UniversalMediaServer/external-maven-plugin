@@ -1,0 +1,16 @@
+#summary Known issues in current release.
+
+= Known Issues/Defects =
+
+==Release 0.3==
+  #  Known defect when running in Maven 3-BETA.  See issue #8.
+
+
+==Release 0.2==
+  #  Known defect when running in Maven 3-BETA.  See issue #8.
+  #  Checksum conflict between download file and extracted file.  See issue #9.
+
+
+==Release 0.1==
+  #  Maven 2.2.1 I always run into NPE.  See issue #7.
+

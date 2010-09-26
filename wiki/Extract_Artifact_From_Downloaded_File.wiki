@@ -31,7 +31,7 @@ See the artifact item example below:
 <BR>
 
 (..as of version 0.3)<BR>
-If you wich to verify the checksum on an extracted file, please use the *< extractFileChecksum >* property to specify the checksum on the extracted file as the *< checksum >* property will only apply to the download file, not the extracted file.  
+If you wish to verify the checksum on an extracted file, please use the *< extractFileChecksum >* property to specify the checksum on the extracted file as the *< checksum >* property will only apply to the download file, not the extracted file.  
 
 <BR>
 <BR>

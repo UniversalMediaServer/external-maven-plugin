@@ -20,7 +20,7 @@ Please see each goal definition below for more details.
 This goal will delete any staged artifact files that were previously downloaded.
 
 ==resolve-external==
-This goal will attempt to resolve the configured artifact items.  If the artifact can be resolved in the local or one of the configured remote Maven repositories then no further action is taken.  If the artifact can not be resolved in the local or one of the configured remote Maven repositories then this plugin will download the file using the provided <downloadUrl> property and saved it to the configured staging directory.  
+This goal will attempt to resolve the configured artifact items.  If the artifact can be resolved in the local or one of the configured remote Maven repositories then no further action is taken.  If the artifact can not be resolved in the local or one of the configured remote Maven repositories then this plugin will download the file using the provided <BR>*< downloadUrl >*<BR>property and saved it to the configured staging directory.  
 
 (_Note: if the artifact item is configured with a MD5 or SHA1 checksum value, this goal will validate the checksum before staging the file.  If the checksum validation fails, the build will be terminated._)
 

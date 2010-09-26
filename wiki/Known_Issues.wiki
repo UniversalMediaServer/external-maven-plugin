@@ -2,14 +2,18 @@
 
 = Known Issues/Defects =
 
-==Release 0.3==
+==Release 0.4==
   #  Known defect when running in Maven 3-BETA.  See issue #8.
 
 
-==Release 0.2==
+==Release 0.3 (SNAPSHOT)==
+  #  Known defect when running in Maven 3-BETA.  See issue #8.
+
+
+==Release 0.2 (SNAPSHOT)==
   #  Known defect when running in Maven 3-BETA.  See issue #8.
   #  Checksum conflict between download file and extracted file.  See issue #9.
 
 
-==Release 0.1==
+==Release 0.1 (SNAPSHOT)==
   #  Known NPE when running maven 2.2.1.  See issue #7.

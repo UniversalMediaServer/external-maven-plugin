@@ -12,5 +12,4 @@
 
 
 ==Release 0.1==
-  #  Maven 2.2.1 I always run into NPE.  See issue #7.
-
+  #  Known NPE when running maven 2.2.1.  See issue #7.

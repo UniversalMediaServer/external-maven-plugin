@@ -34,7 +34,6 @@ See the artifact item example below:
 If you wish to verify the checksum on an extracted file, please use the *< extractFileChecksum >* property to specify the checksum on the extracted file as the *< checksum >* property will only apply to the download file, not the extracted file.  
 
 <BR>
-<BR>
 See the artifact item example below that has a checksum defined for the download file and an extractFileChecksum defined for the extracted file: 
 {{{
 
@@ -55,6 +54,7 @@ See the artifact item example below that has a checksum defined for the download
 </artifactItem>
 
 }}}
+<BR>
 ----
 
 Please visit this link for a complete example of a POM file configured for this this plugin: <BR> 

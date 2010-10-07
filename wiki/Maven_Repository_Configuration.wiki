@@ -5,7 +5,9 @@
 
 This project is hosted in the following public M2 repository:<BR>
 
-http://oss.sonatype.org/content/groups/public
+(RELEASES) http://repo2.maven.org/maven2    (Maven Central)
+(SNAPSHOT) http://oss.sonatype.org/content/groups/public   (Sonatype OSS)
+
 <BR>
 
 = Details =
@@ -23,7 +25,9 @@ Make sure to update the *version* to the latest released version (_or snapshot v
 
 }}}
 
-Add the following *pluginRepository* definition to your *pluginRepositories* section.  
+If you are using a RELEASE version, then the artifacts will automatically be pulled from Maven Central.  No additional configuration is required.  
+
+If you are use a SNAPSHOT version, then you will need to add the following *pluginRepository* definition to your *pluginRepositories* section.  
 
 {{{
 

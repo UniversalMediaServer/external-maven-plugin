@@ -3,10 +3,10 @@
 
 = Introduction =
 
-This project is hosted in the following public M2 repository:<BR>
+This project is hosted in the following public M2 repositories:<BR>
 
-(RELEASES) http://repo2.maven.org/maven2    (Maven Central)
-(SNAPSHOT) http://oss.sonatype.org/content/groups/public   (Sonatype OSS)
+  * <release-builds>  http://repo2.maven.org/maven2    (Maven Central)
+  * <snapshot-builds>  http://oss.sonatype.org/content/groups/public   (Sonatype OSS)
 
 <BR>
 

@@ -4,6 +4,7 @@
 
 ==Release 0.5==
   #  Known defect when running in Maven 3.  See issue #8.
+     (workaround see: comment #4 in issue #8)
   #  Known issue with proxy settings.  See issue #15.
 
 ==Release 0.4==

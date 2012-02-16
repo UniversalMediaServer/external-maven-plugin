@@ -3,7 +3,7 @@
 = Known Issues/Defects =
 
 ==Release 0.5==
-  #  Known defect when running in Maven 3-BETA.  See issue #8.
+  #  Known defect when running in Maven 3.  See issue #8.
   #  Known issue with proxy settings.  See issue #15.
 
 ==Release 0.4==

@@ -47,7 +47,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Base class for all goals in this plugin.
- * 
+ *
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
  * @see http://code.google.com/p/maven-external-dependency-plugin/
  * @version 0.1
@@ -60,7 +60,7 @@ public abstract class AbstractExternalDependencyMojo extends
 
     /**
      * Used to look up Artifacts in the remote repository.
-     * 
+     *
      * @component
      */
     protected ArtifactFactory artifactFactory;
@@ -69,7 +69,7 @@ public abstract class AbstractExternalDependencyMojo extends
      * Collection of ArtifactItems to work on. (ArtifactItem contains groupId,
      * artifactId, version, type, classifier, location, destFile, markerFile and
      * overwrite.) See "Usage" and "Javadoc" for details.
-     * 
+     *
      * @parameter
      * @required
      */
@@ -89,25 +89,25 @@ public abstract class AbstractExternalDependencyMojo extends
 
     /**
      * Forces a download, maven install, maven deploy
-     * 
+     *
      * @parameter default-value="false"
      */
     protected Boolean force = false;
 
-    
+
     /**
-     * If this property is set to true, then the 
-     * downloaded file's checksum will not be 
+     * If this property is set to true, then the
+     * downloaded file's checksum will not be
      * verified using the Sonatype artifact query
      * by checksum validation routine.
-     * 
+     *
      * @parameter default-value="false"
      */
     protected Boolean skipChecksumVerification = false;
-    
+
     /**
      * Create Maven Artifact object from ArtifactItem configuration descriptor
-     * 
+     *
      * @param item
      * @return Artifact
      */
@@ -127,7 +127,7 @@ public abstract class AbstractExternalDependencyMojo extends
      * Generates a (temporary) POM file from the plugin configuration. It's the
      * responsibility of the caller to delete the generated file when no longer
      * needed.
-     * 
+     *
      * @return The path to the generated POM file, never <code>null</code>.
      * @throws MojoExecutionException
      *             If the POM file could not be generated.
@@ -161,7 +161,7 @@ public abstract class AbstractExternalDependencyMojo extends
 
     /**
      * Generates a minimal model from the user-supplied artifact information.
-     * 
+     *
      * @return The generated model, never <code>null</code>.
      */
     protected Model generateModel(ArtifactItem artifact)
@@ -179,7 +179,7 @@ public abstract class AbstractExternalDependencyMojo extends
     /**
      * Resolves the file path and returns a file object instance for an artifact
      * item
-     * 
+     *
      * @return File object for artifact item
      */
     protected File getFullyQualifiedArtifactFilePath(ArtifactItem artifactItem)
@@ -196,7 +196,7 @@ public abstract class AbstractExternalDependencyMojo extends
 
     /**
      * Verifies a checksum for the specified file.
-     * 
+     *
      * @param targetFile
      *            The path to the file from which the checksum is verified, must
      *            not be <code>null</code>.
@@ -228,7 +228,7 @@ public abstract class AbstractExternalDependencyMojo extends
 
     /**
      * Validate artifact configured checksum against specified file.
-     * 
+     *
      * @param artifactItem
      *            to validate checksum against
      * @param targetFile
@@ -297,11 +297,11 @@ public abstract class AbstractExternalDependencyMojo extends
             }
         }
     }
-    
+
 
     /**
      * Validate artifact configured extracted file checksum against specified file.
-     * 
+     *
      * @param artifactItem
      *            to validate checksum against
      * @param targetFile
@@ -371,15 +371,15 @@ public abstract class AbstractExternalDependencyMojo extends
         }
     }
 
-    
+
     /**
      * Validate downloaded file artifact checksum does not match another
-     * artifact's checksum that already exists in a public Maven 
+     * artifact's checksum that already exists in a public Maven
      * repository.  Using the Sonatype REST API to perform a checksum
      * lookup.
-     * 
+     *
      * @since 0.2
-     * 
+     *
      * @param artifactItem
      *            to validate checksum against
      * @param targetFile
@@ -401,13 +401,13 @@ public abstract class AbstractExternalDependencyMojo extends
 
         boolean artifactMismatch = false;
         StringBuilder detectedArtifacts = new StringBuilder();
-        
+
         try
         {
             // calculate SHA1 checksum
             String sha1Checksum = sha1Digester.calc(targetFile);
             getLog().debug("performing Sonatype lookup on artifact SHA1 checksum: " + sha1Checksum);
-        
+
             // perform REST query against Sonatype checksum lookup API
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = dbf.newDocumentBuilder();
@@ -417,10 +417,10 @@ public abstract class AbstractExternalDependencyMojo extends
             // were any results returned?
             if(artifactList != null && artifactList.getLength() > 0)
             {
-                int nodeCount = artifactList.getLength(); 
+                int nodeCount = artifactList.getLength();
                 getLog().info(nodeCount + " existing artifacts found in Sonatype checksum lookup.  verifying artifact GAV.");
-                
-                // iterate over all the query returned artifact definitions and 
+
+                // iterate over all the query returned artifact definitions and
                 // attempt to determine if any of the returned artifact GAV do
                 // no match the GAV of the attempted install artifact.
                 for(int index = 0; index < nodeCount; index++)
@@ -432,51 +432,51 @@ public abstract class AbstractExternalDependencyMojo extends
                         for(int loop = 0; loop < children.getLength(); loop++)
                         {
                             Node artifactProperty = children.item(loop);
-                            
+
                             // append returned artifact property names to an output message string
                             if(!artifactProperty.getNodeName().equalsIgnoreCase("#text"))
                             {
                                 detectedArtifacts.append("\n       " + artifactProperty.getNodeName() + " : " + artifactProperty.getTextContent());
                             }
-                            
+
                             // attempt to validate the returned artifact's GroupId against the target install artifact
                             if(artifactProperty.getNodeName().equalsIgnoreCase("groupId"))
                             {
                                 if(!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getGroupId()))
                                 {
                                     getLog().error("artifact found in Sonatype lookup does not match: "+
-                                        artifactProperty.getNodeName() + ":" + 
-                                        artifactProperty.getTextContent() + " != " + 
+                                        artifactProperty.getNodeName() + ":" +
+                                        artifactProperty.getTextContent() + " != " +
                                         artifactItem.getGroupId());
                                     artifactMismatch = true;
                                 }
                             }
-                            
+
                             // attempt to validate the returned artifact's ArtifactId against the target install artifact
                             else if(artifactProperty.getNodeName().equalsIgnoreCase("artifactId"))
                             {
                                 if(!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getArtifactId()))
                                 {
                                     getLog().error("artifact found in Sonatype lookup does not match: "+
-                                        artifactProperty.getNodeName() + ":" + 
-                                        artifactProperty.getTextContent() + " != " + 
+                                        artifactProperty.getNodeName() + ":" +
+                                        artifactProperty.getTextContent() + " != " +
                                         artifactItem.getArtifactId());
                                     artifactMismatch = true;
                                 }
                             }
-                            
+
                             // attempt to validate the returned artifact's Version against the target install artifact
                             else if(artifactProperty.getNodeName().equalsIgnoreCase("version"))
                             {
                                 if(!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getVersion()))
                                 {
                                     getLog().error("artifact found in Sonatype lookup does not match: "+
-                                        artifactProperty.getNodeName() + ":" + 
-                                        artifactProperty.getTextContent() + " != " + 
+                                        artifactProperty.getNodeName() + ":" +
+                                        artifactProperty.getTextContent() + " != " +
                                         artifactItem.getVersion());
                                     artifactMismatch = true;
                                 }
-                            }                                        
+                            }
                         }
                     }
 
@@ -492,7 +492,7 @@ public abstract class AbstractExternalDependencyMojo extends
         {
             getLog().error(ex);
         }
-        
+
         // was a mismatch detected?
         if(artifactMismatch == true)
         {

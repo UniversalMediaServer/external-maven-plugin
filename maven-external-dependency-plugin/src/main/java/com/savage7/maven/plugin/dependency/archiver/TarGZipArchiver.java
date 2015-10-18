@@ -12,8 +12,8 @@ public class TarGZipArchiver extends TarArchiver
 
     private void setupCompressionMethod() throws ArchiverException
     {
-        TarCompressionMethod compression = new TarCompressionMethod();
-        compression.setValue("gzip");
+
+        TarCompressionMethod compression = TarCompressionMethod.gzip;
         this.setCompression(compression);
     }
 

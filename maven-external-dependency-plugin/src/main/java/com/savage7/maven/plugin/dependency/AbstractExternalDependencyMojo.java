@@ -48,9 +48,6 @@ import org.w3c.dom.NodeList;
 /**
  * Base class for all goals in this plugin.
  *
- * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
- * @version 0.1
  * @category Maven Plugin
  * @ThreadSafe
  */
@@ -405,7 +402,8 @@ public abstract class AbstractExternalDependencyMojo extends
         try
         {
             // calculate SHA1 checksum
-            String sha1Checksum = sha1Digester.calc(targetFile);
+            digester.calculate(targetFile);
+            String sha1Checksum = digester.getSha1();
             getLog().debug("performing Sonatype lookup on artifact SHA1 checksum: " + sha1Checksum);
 
             // perform REST query against Sonatype checksum lookup API

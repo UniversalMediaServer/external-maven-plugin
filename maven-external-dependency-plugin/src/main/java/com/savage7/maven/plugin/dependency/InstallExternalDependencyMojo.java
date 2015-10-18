@@ -18,20 +18,16 @@ import java.io.File;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.installer.ArtifactInstaller;
-import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.install.DualDigester;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
-import org.codehaus.plexus.digest.Digester;
 
 /**
  * Install external dependencies to local repository.
- * 
- * @goal install-external
- * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
- * @version 0.1
+ *
+ * @goal install
  * @category Maven Plugin
  * @ThreadSafe
  */
@@ -51,22 +47,15 @@ public class InstallExternalDependencyMojo extends
     protected ArtifactInstaller installer;
 
     /**
-     * Digester for MD5.
-     * 
+     * Digester for MD5 and SHA-1.
+     *
      * @component default-value="md5"
      */
-    protected Digester md5Digester;
-
-    /**
-     * Digester for SHA-1.
-     * 
-     * @component default-value="sha1"
-     */
-    protected Digester sha1Digester;
+    protected DualDigester digester;
 
     /**
      * Flag whether to create checksums (MD5, SHA-1) or not.
-     * 
+     *
      * @parameter expression="${createChecksum}" default-value="true"
      */
     protected boolean createChecksum = true;
@@ -79,8 +68,6 @@ public class InstallExternalDependencyMojo extends
             // (not sure why this is needed, but doesn't see to work otherwise?)
             super.localRepository = this.localRepository;
             super.createChecksum = this.createChecksum;
-            super.md5Digester = this.md5Digester;
-            super.sha1Digester = this.sha1Digester;
 
             Boolean cachedCreateChecksums = this.createChecksum;
 
@@ -177,7 +164,7 @@ public class InstallExternalDependencyMojo extends
                                 // one
                                 if (artifactItem.getPomFile() != null)
                                 {
-                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
+                                	ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
                                         artifact, artifactItem.getPomFile());
                                     getLog().debug(
                                         "installing defined POM file: "
@@ -189,7 +176,7 @@ public class InstallExternalDependencyMojo extends
                                     // dynamically create a new POM file for
                                     // this artifact
                                     generatedPomFile = generatePomFile(artifactItem);
-                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
+                                    ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
                                         artifact, generatedPomFile);
 
                                     if (artifactItem.getGeneratePom() == true)
@@ -222,7 +209,7 @@ public class InstallExternalDependencyMojo extends
                             {
                                 super.createChecksum = cachedCreateChecksums;
                             }
-                            installChecksums(artifact);
+                            installChecksums(artifact, true);
                         }
                         else
                         {

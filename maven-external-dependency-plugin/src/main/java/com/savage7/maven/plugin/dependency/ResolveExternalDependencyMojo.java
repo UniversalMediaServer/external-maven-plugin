@@ -24,12 +24,14 @@ import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
 import org.apache.maven.artifact.resolver.ArtifactResolutionException;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.settings.MavenSettingsBuilder;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.building.DefaultSettingsBuilder;
+import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.observers.Debug;
 import org.apache.maven.wagon.proxy.ProxyInfo;
@@ -42,11 +44,8 @@ import org.codehaus.plexus.util.FileUtils;
 
 /**
  * Download/Acquire external Maven artifacts, copy to staging directory.
- * 
- * @goal resolve-external
- * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
- * @version 0.1
+ *
+ * @goal resolve
  * @category Maven Plugin
  * @ThreadSafe
  */
@@ -62,14 +61,14 @@ public class ResolveExternalDependencyMojo extends
 
     /**
      * Used to look up Artifacts in the remote repository.
-     * 
+     *
      * @component
      */
     protected ArtifactResolver artifactResolver;
 
     /**
      * List of Remote Repositories used by the resolver
-     * 
+     *
      * @parameter expression="${project.remoteArtifactRepositories}"
      * @readonly
      * @required
@@ -83,20 +82,20 @@ public class ResolveExternalDependencyMojo extends
      */
     protected ArchiverManager archiverManager;
 
-    /** 
-     * @component 
-     * @required 
-     * @readonly 
-     */ 
-    private WagonManager wagonManager; 
+    /**
+     * @component
+     * @required
+     * @readonly
+     */
+    private WagonManager wagonManager;
 
-    /** 
-     * @component 
-     * @required 
-     * @readonly 
-     */ 
-    private MavenSettingsBuilder mavenSettingsBuilder; 
-    
+    /**
+     * @component
+     * @required
+     * @readonly
+     */
+    private DefaultSettingsBuilder settingsBuilder;
+
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try
@@ -137,7 +136,7 @@ public class ResolveExternalDependencyMojo extends
                 // has passed (if required), lets copy the temporary
                 // file to the staging location
                 final File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
-                
+
                 // only proceed with this artifact if it is not already
                 // installed or it is configured to be forced.
                 if (!artifactResolved || (artifactItem.getForce() && !artifactFile.exists()) || (force && !artifactFile.exists()) )
@@ -193,9 +192,10 @@ public class ResolveExternalDependencyMojo extends
                                 wagon.addTransferListener(debug);
                             }
                             wagon.setTimeout(artifactItem.getTimeout());
-                            Settings settings = mavenSettingsBuilder.buildSettings();
+                            settingsBuilder = new DefaultSettingsBuilder();
+                            Settings settings = settingsBuilder.build(new DefaultSettingsBuildingRequest()).getEffectiveSettings();
                             ProxyInfo proxyInfo = null;
-                            if (settings != null&& settings.getActiveProxy() != null)
+                            if (settings != null && settings.getActiveProxy() != null)
                             {
                                 Proxy settingsProxy = settings.getActiveProxy();
                                 proxyInfo = new ProxyInfo();
@@ -211,7 +211,7 @@ public class ResolveExternalDependencyMojo extends
                                 wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
                             else
                                 wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
-                            
+
                             wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
 
                             getLog().debug(
@@ -258,7 +258,7 @@ public class ResolveExternalDependencyMojo extends
                             File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
                             tempOutputDir.mkdirs();
                             File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
-                            
+
                             UnArchiver unarchiver;
                             try
                             {
@@ -278,7 +278,7 @@ public class ResolveExternalDependencyMojo extends
                             {
                                 throw new MojoExecutionException( "Archive type, no unarchiver available for it", e);
                             }
-                            
+
                             // ensure the path exists to write the file to
                             File parentDirectory = artifactFile.getParentFile();
                             if (parentDirectory != null && !parentDirectory.exists())
@@ -290,8 +290,8 @@ public class ResolveExternalDependencyMojo extends
                             if (unarchiver.getDestFile()==null)
                                 unarchiver.setDestDirectory(tempOutputDir);
                             unarchiver.extract();//will extract nothing, the file selector will do the trick
-                            
-                            
+
+
 
                             // if a zip entry was not found, then throw a Mojo
                             // exception
@@ -325,7 +325,7 @@ public class ResolveExternalDependencyMojo extends
                                         + "\r\n   download URL : "
                                         + artifactItem.getDownloadUrl());
                             }
-                            
+
 
                             getLog().info(
                                 "extracted target file to staging path: "
@@ -394,7 +394,7 @@ public class ResolveExternalDependencyMojo extends
 
     /**
      * resolve the artifact in local or remote repository
-     * 
+     *
      * @param artifactItem
      * @param artifact
      * @return
@@ -408,17 +408,22 @@ public class ResolveExternalDependencyMojo extends
         // Boolean artifactAlreadyInstalled =
         // getLocalRepoFile(artifact).exists();
         boolean artifactResolved = false;
-        try
+        ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+        request.setArtifact(artifact);
+        request.setRemoteRepositories(remoteRepositories);
+        request.setLocalRepository(localRepository);
+        return artifactResolver.resolve(request).isSuccess();
+
+        /*try
         {
-            artifactResolver.resolve(artifact, remoteRepositories,
-                localRepository);
+            artifactResolver.resolve(artifact, remoteRepositories, localRepository);
             artifactResolved = true;
         }
         catch (ArtifactResolutionException e)
         {
             // REV 0.5-SNAPSHOT; 2011-04-30; RRS
             //
-            // AS OF MAVEN V3, THIS EXCEPTION IS GETTING THROWN WHEN 
+            // AS OF MAVEN V3, THIS EXCEPTION IS GETTING THROWN WHEN
             // AN ATIFACT CANNOT BE RESOLVED IN THE LOCAL REPOSITORY,
             // THUS CAUSING THE MAVEN BUILD TO FAIL AND NOT PERFORM
             // THE EXTERNAL DEPENDENCY DOWNLOAD.
@@ -430,14 +435,14 @@ public class ResolveExternalDependencyMojo extends
 //                    + "\r\n   groupId    : " + artifact.getGroupId()
 //                    + "\r\n   artifactId : " + artifact.getArtifactId()
 //                    + "\r\n   version    : " + artifact.getVersion());
-            
-            artifactResolved = false;            
+
+            artifactResolved = false;
         }
         catch (ArtifactNotFoundException e)
         {
             artifactResolved = false;
         }
 
-        return artifactResolved;
+        return artifactResolved;*/
     }
 }

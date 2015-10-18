@@ -21,10 +21,7 @@ import org.apache.maven.plugin.MojoFailureException;
 /**
  * Remove any downloaded external dependency files from the staging directory.
  *
- * @goal clean-external
- * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
- * @version 0.1
+ * @goal clean
  * @category Maven Plugin
  * @ThreadSafe
  */

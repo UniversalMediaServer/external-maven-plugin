@@ -21,10 +21,7 @@ import org.codehaus.plexus.util.StringUtils;
 /**
  * ArtifactItem represents information specified in the plugin configuration
  * section for each artifact.
- * 
- * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
- * @version 0.1
+ *
  * @ThreadSafe
  */
 
@@ -32,7 +29,7 @@ public class ArtifactItem
 {
     /**
      * Group Id of Artifact.
-     * 
+     *
      * @parameter
      * @required
      */
@@ -40,7 +37,7 @@ public class ArtifactItem
 
     /**
      * Name of Artifact.
-     * 
+     *
      * @parameter
      * @required
      */
@@ -48,14 +45,14 @@ public class ArtifactItem
 
     /**
      * Version of Artifact.
-     * 
+     *
      * @parameter
      */
     private String version = null;
 
     /**
      * Classifier for Artifact (tests,sources,etc).
-     * 
+     *
      * @parameter
      */
     private String classifier;
@@ -63,14 +60,14 @@ public class ArtifactItem
     /**
      * Local file to download artifact to. Location file to install artifact
      * from.
-     * 
+     *
      * @parameter default-value="{artifactId}-{version}.{packaging}"
      */
     private String localFile = "{artifactId}-{version}-{classifier}.{packaging}";
 
     /**
      * URL to download artifact from.
-     * 
+     *
      * @parameter
      * @required
      */
@@ -78,7 +75,7 @@ public class ArtifactItem
 
     /**
      * URL to download artifact from.
-     * 
+     *
      * @parameter
      */
     private String downloadUrl;
@@ -92,7 +89,7 @@ public class ArtifactItem
 
     /**
      * Packaging type of the artifact to be installed.
-     * 
+     *
      * @parameter default-value="jar"
      * @required
      */
@@ -100,21 +97,21 @@ public class ArtifactItem
 
     /**
      * Installs the artifact into the local maven repository.
-     * 
+     *
      * @parameter default-value="true"
      */
     private Boolean install = true;
 
     /**
      * Deploys the artifact to a remote maven repository.
-     * 
+     *
      * @parameter default-value="true"
      */
     private Boolean deploy = true;
 
     /**
      * Forces a download, maven install, maven deploy.
-     * 
+     *
      * @parameter default-value="false"
      */
     private Boolean force = false;
@@ -122,7 +119,7 @@ public class ArtifactItem
     /**
      * Location of an existing POM file to be installed alongside the main
      * artifact, given by the {@link #file} parameter.
-     * 
+     *
      * @parameter expression="${pomFile}"
      */
     private File pomFile;
@@ -131,57 +128,57 @@ public class ArtifactItem
      * Generate a minimal POM for the artifact if none is supplied via the
      * parameter {@link #pomFile}. Defaults to <code>true</code> if there is no
      * existing POM in the local repository yet.
-     * 
+     *
      * @parameter expression="${generatePom}" default-value="true"
      */
     private Boolean generatePom = true;
 
     /**
      * Flag whether to create checksums (MD5, SHA-1) or not.
-     * 
+     *
      * @parameter expression="${createChecksum}"
      */
     private String createChecksum;
 
     /**
-     * If this property is set to true, then the 
-     * downloaded file's checksum will not be 
+     * If this property is set to true, then the
+     * downloaded file's checksum will not be
      * verified using the Sonatype artifact query
      * by checksum validation routine.
-     * 
+     *
      * @parameter default-value="false"
      */
     private Boolean skipChecksumVerification = false;
 
     /**
      * Checksum for Artifact.
-     * 
+     *
      * @parameter
      */
     private String checksum;
 
     /**
      * File name to extract from downloaded ZIP file.
-     * 
+     *
      * @parameter
      */
     private String extractFile;
 
-  
+
     /**
      * File checksum from file that was extracted from downloaded ZIP file.
-     * 
+     *
      * @parameter
      */
     private String extractFileChecksum;
-    
+
     /**
      * In case you need to repack an directory as a new artifact
-     * 
+     *
      * @parameter
      */
     private boolean repack = false;
-    
+
     /**
      * default constructor.
      */
@@ -192,7 +189,7 @@ public class ArtifactItem
 
     /**
      * alternate constructor.
-     * 
+     *
      * @param artifact
      *            Artifact
      */
@@ -207,7 +204,7 @@ public class ArtifactItem
 
     /**
      * filter empty strings.
-     * 
+     *
      * @param in
      *            input string to test
      * @return if string was empty as null is returned
@@ -234,7 +231,7 @@ public class ArtifactItem
 
     /**
      * The artifactId to set.
-     * 
+     *
      * @param artifact
      *            item to set
      */
@@ -304,7 +301,7 @@ public class ArtifactItem
 
     /**
      * returns a string representations of the artifact item.
-     * 
+     *
      * @return result string
      */
     public final String toString()
@@ -531,16 +528,16 @@ public class ArtifactItem
     {
         return (hasChecksum() && extractFileChecksum != null && !extractFileChecksum.isEmpty());
     }
-    
+
     /**
      * @return Extracted File Checksum.
-     */    
+     */
     public final String getExtractFileChecksum()
     {
         return extractFileChecksum;
     }
-    
-    
+
+
     /**
      * @param checksum
      *            Checksum
@@ -567,8 +564,8 @@ public class ArtifactItem
         this.skipChecksumVerification = skipChecksumVerification;
     }
 
-    
-    
+
+
     /**
      * @return ExtractFile.
      */
@@ -596,7 +593,7 @@ public class ArtifactItem
 
     /**
      * replace parameterized tokens in string.
-     * 
+     *
      * @param source
      *            source string to replace tokens in
      * @return parameterized string

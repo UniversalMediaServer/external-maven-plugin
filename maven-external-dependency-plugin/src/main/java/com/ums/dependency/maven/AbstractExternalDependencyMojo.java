@@ -17,7 +17,7 @@
  * under the License.
  **/
 
-package com.savage7.maven.plugin.dependency;
+package com.ums.dependency.maven;
 
 import java.io.File;
 import java.io.IOException;

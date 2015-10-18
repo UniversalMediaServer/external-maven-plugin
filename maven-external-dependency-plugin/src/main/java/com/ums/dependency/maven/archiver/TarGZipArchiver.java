@@ -1,4 +1,4 @@
-package com.savage7.maven.plugin.dependency.archiver;
+package com.ums.dependency.maven.archiver;
 
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.tar.TarArchiver;

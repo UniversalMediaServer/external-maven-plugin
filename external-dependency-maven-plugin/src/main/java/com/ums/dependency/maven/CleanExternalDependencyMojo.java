@@ -15,6 +15,8 @@
 package com.ums.dependency.maven;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -22,32 +24,32 @@ import org.apache.maven.plugin.MojoFailureException;
  * Remove any downloaded external dependency files from the staging directory.
  *
  * @goal clean
+ * @phase clean
  * @category Maven Plugin
  * @ThreadSafe
  */
 public class CleanExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		try {
-			getLog().info("starting to clean external dependency staged files");
+		getLog().info("Starting to clean external dependency staged files");
 
-			// loop over and process all configured artifact items
-			for (ArtifactItem artifactItem : artifactItems) {
-				//
-				// REMOVE ANY DOWNLOADED FILES FROM THE STAGING DIRECTORY
-				//
-				File downloadFile = getFullyQualifiedArtifactFilePath(artifactItem);
+		// Loop over and process all configured artifact items
+		for (ArtifactItem artifactItem : artifactItems) {
+			// Remove any downloaded files from the staging directory
+			File downloadFile = getFullyQualifiedArtifactFilePath(artifactItem);
 
-				if (downloadFile.exists()) {
-					getLog().info("deleting stated external dependency file: " + downloadFile.getCanonicalPath());
-					downloadFile.delete();
+			if (downloadFile.exists()) {
+				getLog().info("Deleting stated external dependency file: " + downloadFile.getAbsolutePath());
+				try {
+					Files.delete(downloadFile.toPath());
+				} catch (IOException e) {
+					throw new MojoExecutionException(
+						"Could not delete file \"" + downloadFile.getAbsolutePath() + "\": " + e.getMessage(), e
+					);
 				}
 			}
-			getLog().info("finished cleaning external dependency staged files");
-		} catch (Exception e) {
-			getLog().error(e);
-			throw new MojoExecutionException(e.getMessage(), e);
 		}
+		getLog().info("Finished cleaning external dependency staged files");
 	}
 
 }

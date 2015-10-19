@@ -86,10 +86,12 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
     <build>
          <plugins>
             <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.3</version>
-                <configuration>
-                </configuration>
+				<configuration>
+					<goalPrefix>ums-external</goalPrefix>
+				</configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>

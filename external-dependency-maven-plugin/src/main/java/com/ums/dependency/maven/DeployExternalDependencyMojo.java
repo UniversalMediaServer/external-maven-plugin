@@ -65,9 +65,7 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
 	private boolean offline;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		// update base configuration parameters
-		// (not sure why this is needed, but doesn't see to work otherwise?)
-		super.localRepository = this.localRepository;
+		super.execute();
 
 		getLog().info("starting to deploy external dependencies to distribution repository");
 

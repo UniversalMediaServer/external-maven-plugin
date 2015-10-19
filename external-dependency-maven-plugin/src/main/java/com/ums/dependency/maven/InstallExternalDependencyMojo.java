@@ -33,13 +33,6 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 public class InstallExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
 	/**
-	 * @parameter expression="${localRepository}"
-	 * @required
-	 * @readonly
-	 */
-	protected ArtifactRepository localRepository;
-
-	/**
 	 * @component
 	 */
 	protected ArtifactInstaller installer;
@@ -54,17 +47,16 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
 	/**
 	 * Flag whether to create checksums (MD5, SHA-1) or not.
 	 *
-	 * @parameter expression="${createChecksum}" default-value="true"
+	 * @parameter property="createChecksum" default-value="true"
 	 */
 	protected boolean createChecksum = true;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		try {
-			// update base configuration parameters
-			// (not sure why this is needed, but doesn't see to work otherwise?)
-			super.localRepository = this.localRepository;
-			super.createChecksum = this.createChecksum;
+		super.execute();
+		// Super class defaults to false so we set it
+		super.createChecksum = this.createChecksum;
 
+		try {
 			Boolean cachedCreateChecksums = this.createChecksum;
 
 			getLog().info("starting to install external dependencies into local repository");

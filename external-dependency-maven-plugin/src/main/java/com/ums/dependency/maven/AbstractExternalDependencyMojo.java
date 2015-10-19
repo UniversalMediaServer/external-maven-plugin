@@ -26,13 +26,21 @@ import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.install.AbstractInstallMojo;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.RepositorySystem;
+import org.apache.maven.settings.building.DefaultSettingsBuilder;
+import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
+import org.apache.maven.settings.building.SettingsBuilder;
+import org.apache.maven.settings.building.SettingsBuildingRequest;
+import org.apache.maven.settings.io.DefaultSettingsReader;
+import org.apache.maven.settings.io.DefaultSettingsWriter;
+import org.apache.maven.settings.validation.DefaultSettingsValidator;
 import org.codehaus.plexus.digest.Digester;
 import org.codehaus.plexus.digest.DigesterException;
 import org.codehaus.plexus.digest.Md5Digester;
@@ -56,7 +64,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 *
 	 * @component
 	 */
-	protected ArtifactFactory artifactFactory;
+	protected RepositorySystem repositorySystem;
 
 	/**
 	 * Collection of ArtifactItems to work on. (ArtifactItem contains groupId,
@@ -74,6 +82,25 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * @readonly
 	 */
 	protected MavenProject project;
+
+	/**
+	 * @parameter default-value="${user.home}/.m2/settings.xml"
+	 * @required
+	 */
+	protected String userSettings;
+
+	/**
+	 * @parameter default-value="${env.M2_HOME}/conf/settings.xml"
+	 * @required
+	 */
+	protected String globalSettings;
+
+	/**
+	 * @parameter default-value="${localRepository}"
+	 * @required
+	 * @readonly
+	 */
+	protected ArtifactRepository localRepository;
 
 	/**
 	 * @parameter default-value="${project.build.directory}"
@@ -96,6 +123,13 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 */
 	protected Boolean skipChecksumVerification = false;
 
+	protected final String NEWLINE = System.getProperty("line.separator");
+	@Override
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		// Super class lack a default value and requires it to be set manually
+		super.localRepository = this.localRepository;
+	}
+
 	/**
 	 * Create Maven Artifact object from ArtifactItem configuration descriptor
 	 *
@@ -106,7 +140,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 		Artifact artifact = null;
 
 		// create Maven artifact with a classifier
-		artifact = artifactFactory.createArtifactWithClassifier(item.getGroupId(), item.getArtifactId(),
+		artifact = repositorySystem.createArtifactWithClassifier(item.getGroupId(), item.getArtifactId(),
 			item.getVersion(), item.getPackaging(), item.getClassifier());
 
 		return artifact;
@@ -166,7 +200,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 		if (artifactStagingDirectory == null || artifactStagingDirectory.isEmpty()) {
 			artifactStagingDirectory = stagingDirectory;
 		}
-		return new File(artifactStagingDirectory + File.separator + artifactItem.getLocalFile());
+		return new File(artifactStagingDirectory, artifactItem.getLocalFile());
 	}
 
 	/**
@@ -204,33 +238,38 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * @throws MojoFailureException
 	 * @throws IOException
 	 */
-	protected void verifyArtifactItemChecksum(ArtifactItem artifactItem, File targetFile)
-		throws MojoExecutionException, MojoFailureException, IOException {
-		// if a checksum was specified, we must verify the checksum against the
-		// downloaded file
+	protected void verifyArtifactItemChecksum(ArtifactItem artifactItem, File targetFile) throws MojoExecutionException, MojoFailureException {
+
+		// If a checksum was specified, we must verify the checksum against the downloaded file
 		if (artifactItem.hasChecksum()) {
-			getLog().info("verifying checksum on downloaded file: CKSM=" + artifactItem.getChecksum());
+			getLog().info(String.format(
+				"Verifying checksum on downloaded file %s: %s",
+				targetFile.getName(),
+				artifactItem.getChecksum()
+			));
 
-			// perform MD5 checksum verification
-			getLog().info("testing for MD5 checksum on artifact: " + artifactItem.toString());
+			// Perform MD5 checksum verification
+			getLog().info("Testing for MD5 checksum on artifact " + artifactItem.toString());
 			if (!verifyChecksum(targetFile, new Md5Digester(), artifactItem.getChecksum())) {
-				getLog().info("verification failed on MD5 checksum for file: " + targetFile.getCanonicalPath());
-				getLog().info("testing for SHA1 checksum on artifact: " + artifactItem.toString());
+				getLog().info("Verification failed on MD5 checksum for file: " + targetFile.getAbsolutePath());
+				getLog().info("Testing for SHA1 checksum on artifact: " + artifactItem.toString());
 
-				// did not pass MD5 checksum verification, now test SHA1
-				// checksum
+				// Did not pass MD5 checksum verification, now test SHA1 checksum
 				if (!verifyChecksum(targetFile, new Sha1Digester(), artifactItem.getChecksum())) {
-					// checksum verification failed, throw error
-					throw new MojoFailureException("Both MD5 and SHA1 checksum verification failed for: "
-						+ "\r\n   groupId    : " + artifactItem.getGroupId() + "\r\n   artifactId : "
-						+ artifactItem.getArtifactId() + "\r\n   version    : " + artifactItem.getVersion()
-						+ "\r\n   checksum   : " + artifactItem.getChecksum() + "\r\n   file       : "
-						+ targetFile.getCanonicalPath());
+					// Checksum verification failed, throw error
+					throw new MojoFailureException(
+						"Both MD5 and SHA1 checksum verification failed for: " + NEWLINE +
+						"  groupId    : " + artifactItem.getGroupId() + NEWLINE +
+						"  artifactId : " + artifactItem.getArtifactId() + NEWLINE +
+						"  version    : " + artifactItem.getVersion() + NEWLINE +
+						"  checksum   : " + artifactItem.getChecksum() + NEWLINE +
+						"  file       : " + targetFile.getAbsolutePath()
+					);
 				} else {
-					getLog().info("verification passed on SHA1 checksum for artifact: " + artifactItem.toString());
+					getLog().info("Verification passed on SHA1 checksum for artifact: " + artifactItem.toString());
 				}
 			} else {
-				getLog().info("verification passed on MD5 checksum for artifact: " + artifactItem.toString());
+				getLog().info("Verification passed on MD5 checksum for artifact: " + artifactItem.toString());
 			}
 		}
 	}
@@ -401,5 +440,34 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 					+ detectedArtifacts.toString()
 					+ "\n\n Please verify that the GAV defined on the target artifact is correct.\n");
 		}
+	}
+
+	/**
+	 * Generates a default settings builder.
+	 * @return
+	 * 			The SettingsBuilder instance
+	 */
+	public SettingsBuilder getSettingsBuilder() {
+		DefaultSettingsBuilder settingsBuilder = new DefaultSettingsBuilder();
+		settingsBuilder.setSettingsReader(new DefaultSettingsReader());
+		settingsBuilder.setSettingsValidator(new DefaultSettingsValidator());
+		settingsBuilder.setSettingsWriter(new DefaultSettingsWriter());
+		return settingsBuilder;
+	}
+
+	/**
+	 * Generates a settings builder request from parameters.
+	 * @return
+	 * 			The SettingsBuilderRequest instance
+	 */
+	public SettingsBuildingRequest getSettingsBuildingRequest() {
+		DefaultSettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
+		if (userSettings != null) {
+			request.setUserSettingsFile(new File(userSettings));
+		}
+		if (globalSettings != null) {
+			request.setGlobalSettingsFile(new File(globalSettings));
+		}
+		return request;
 	}
 }

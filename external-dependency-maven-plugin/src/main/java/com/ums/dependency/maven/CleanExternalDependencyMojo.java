@@ -25,37 +25,29 @@ import org.apache.maven.plugin.MojoFailureException;
  * @category Maven Plugin
  * @ThreadSafe
  */
-public class CleanExternalDependencyMojo extends AbstractExternalDependencyMojo
-{
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        try
-        {
-            getLog().info("starting to clean external dependency staged files");
+public class CleanExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
-            // loop over and process all configured artifact items
-            for (ArtifactItem artifactItem : artifactItems)
-            {
-                //
-                // REMOVE ANY DOWNLOADED FILES FROM THE STAGING DIRECTORY
-                //
-                File downloadFile = getFullyQualifiedArtifactFilePath(artifactItem);
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		try {
+			getLog().info("starting to clean external dependency staged files");
 
-                if (downloadFile.exists())
-                {
-                    getLog().info(
-                            "deleting stated external dependency file: "
-                                    + downloadFile.getCanonicalPath());
-                    downloadFile.delete();
-                }
-            }
-            getLog().info("finished cleaning external dependency staged files");
-        }
-        catch (Exception e)
-        {
-            getLog().error(e);
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
-    }
+			// loop over and process all configured artifact items
+			for (ArtifactItem artifactItem : artifactItems) {
+				//
+				// REMOVE ANY DOWNLOADED FILES FROM THE STAGING DIRECTORY
+				//
+				File downloadFile = getFullyQualifiedArtifactFilePath(artifactItem);
+
+				if (downloadFile.exists()) {
+					getLog().info("deleting stated external dependency file: " + downloadFile.getCanonicalPath());
+					downloadFile.delete();
+				}
+			}
+			getLog().info("finished cleaning external dependency staged files");
+		} catch (Exception e) {
+			getLog().error(e);
+			throw new MojoExecutionException(e.getMessage(), e);
+		}
+	}
 
 }

@@ -18,7 +18,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -49,393 +48,328 @@ import org.codehaus.plexus.util.FileUtils;
  * @category Maven Plugin
  * @ThreadSafe
  */
-public class ResolveExternalDependencyMojo extends
-    AbstractExternalDependencyMojo
-{
-    /**
-     * @parameter expression="${localRepository}"
-     * @required
-     * @readonly
-     */
-    protected ArtifactRepository localRepository;
+public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
-    /**
-     * Used to look up Artifacts in the remote repository.
-     *
-     * @component
-     */
-    protected ArtifactResolver artifactResolver;
+	/**
+	 * @parameter expression="${localRepository}"
+	 * @required
+	 * @readonly
+	 */
+	protected ArtifactRepository localRepository;
 
-    /**
-     * List of Remote Repositories used by the resolver
-     *
-     * @parameter expression="${project.remoteArtifactRepositories}"
-     * @readonly
-     * @required
-     */
-    @SuppressWarnings("rawtypes")
-    protected java.util.List remoteRepositories;
+	/**
+	 * Used to look up Artifacts in the remote repository.
+	 *
+	 * @component
+	 */
+	protected ArtifactResolver artifactResolver;
 
-    /**
-     * @component
-     * @readonly
-     */
-    protected ArchiverManager archiverManager;
+	/**
+	 * List of Remote Repositories used by the resolver
+	 *
+	 * @parameter expression="${project.remoteArtifactRepositories}"
+	 * @readonly
+	 * @required
+	 */
+	@SuppressWarnings("rawtypes")
+	protected java.util.List remoteRepositories;
 
-    /**
-     * @component
-     * @required
-     * @readonly
-     */
-    private WagonManager wagonManager;
+	/**
+	 * @component
+	 * @readonly
+	 */
+	protected ArchiverManager archiverManager;
 
-    private DefaultSettingsBuilder settingsBuilder;
+	/**
+	 * @component
+	 * @required
+	 * @readonly
+	 */
+	private WagonManager wagonManager;
 
-    public void execute() throws MojoExecutionException, MojoFailureException
-    {
-        try
-        {
-            // update base configuration parameters
-            // (not sure why this is needed, but
-            // doesn't see to work otherwise?)
-            super.localRepository = this.localRepository;
+	private DefaultSettingsBuilder settingsBuilder;
 
-            getLog().info("starting to resolve external dependencies");
+	public void execute() throws MojoExecutionException, MojoFailureException {
+		try {
+			// update base configuration parameters
+			// (not sure why this is needed, but
+			// doesn't see to work otherwise?)
+			super.localRepository = this.localRepository;
 
-            // get a set of all project artifacts
-            // Set<Artifact> projectArtifacts = project.createArtifacts(
-            // artifactFactory, null, null );
+			getLog().info("starting to resolve external dependencies");
 
-            Map<URL, File> cachedDownloads = new HashMap<URL, File>();
+			// get a set of all project artifacts
+			// Set<Artifact> projectArtifacts = project.createArtifacts(
+			// artifactFactory, null, null );
 
-            // loop over and process all configured artifacts
-            for (final ArtifactItem artifactItem : artifactItems)
-            {
-                getLog().info(
-                    "attempting to resolve external artifact: "
-                        + artifactItem.toString());
+			Map<URL, File> cachedDownloads = new HashMap<URL, File>();
 
-                //
-                // CREATE MAVEN ARTIFACT
-                //
-                Artifact artifact = createArtifact(artifactItem);
+			// loop over and process all configured artifacts
+			for (final ArtifactItem artifactItem : artifactItems) {
+				getLog().info("attempting to resolve external artifact: " + artifactItem.toString());
 
-                // determine if the artifact is already installed in an
-                // existing Maven repository
-                // Boolean artifactAlreadyInstalled =
-                // getLocalRepoFile(artifact).exists();
-                boolean artifactResolved = resolveArtifactItem(artifact);
+				//
+				// CREATE MAVEN ARTIFACT
+				//
+				Artifact artifact = createArtifact(artifactItem);
 
-                // now that the file has been successfully downloaded
-                // and the checksum verification
-                // has passed (if required), lets copy the temporary
-                // file to the staging location
-                final File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
+				// determine if the artifact is already installed in an
+				// existing Maven repository
+				// Boolean artifactAlreadyInstalled =
+				// getLocalRepoFile(artifact).exists();
+				boolean artifactResolved = resolveArtifactItem(artifact);
 
-                // only proceed with this artifact if it is not already
-                // installed or it is configured to be forced.
-                if (!artifactResolved || (!artifactFile.exists() && (force || artifactItem.getForce()))) {
-                //if (!artifactResolved || (artifactItem.getForce() && !artifactFile.exists()) || (force && !artifactFile.exists())) {
+				// now that the file has been successfully downloaded
+				// and the checksum verification
+				// has passed (if required), lets copy the temporary
+				// file to the staging location
+				final File artifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
 
-                    if (artifactItem.getForce())
-                    {
-                        getLog().debug("this artifact is flagged as a FORCED download: " + artifactItem.toString());
-                    }
+				// only proceed with this artifact if it is not already
+				// installed or it is configured to be forced.
+				if (!artifactResolved || (!artifactFile.exists() && (force || artifactItem.getForce()))) {
+					// if (!artifactResolved || (artifactItem.getForce() &&
+					// !artifactFile.exists()) || (force &&
+					// !artifactFile.exists())) {
 
-                    //
-                    // DOWNLOAD FILE FROM URL
-                    //
-                    if (artifactItem.getDownloadUrl() != null)
-                    {
-                        URL downloadUrl = new URL(artifactItem.getDownloadUrl());
+					if (artifactItem.getForce()) {
+						getLog().debug("this artifact is flagged as a FORCED download: " + artifactItem.toString());
+					}
 
-                        final File tempDownloadFile;
+					//
+					// DOWNLOAD FILE FROM URL
+					//
+					if (artifactItem.getDownloadUrl() != null) {
+						URL downloadUrl = new URL(artifactItem.getDownloadUrl());
 
-                        if (cachedDownloads.containsKey(downloadUrl)) {
-                            tempDownloadFile = cachedDownloads.get(downloadUrl);
-                            getLog().info(
-                                "Artifact already downloaded from URL: "
-                                    + artifactItem.getDownloadUrl());
-                            getLog().debug(
-                                "Using cached download: "
-                                    + tempDownloadFile.getCanonicalPath());
-                        } else {
-                            // create a temporary download file
-                            tempDownloadFile = File.createTempFile(
-                            artifactItem.getLocalFile(), "." + getExtension(downloadUrl));
+						final File tempDownloadFile;
 
-                            getLog().info(
-                                "downloading artifact from URL: "
-                                    + artifactItem.getDownloadUrl());
-                            getLog().debug(
-                                "downloading artifact to temporary file: "
-                                    + tempDownloadFile.getCanonicalPath());
+						if (cachedDownloads.containsKey(downloadUrl)) {
+							tempDownloadFile = cachedDownloads.get(downloadUrl);
+							getLog().info("Artifact already downloaded from URL: " + artifactItem.getDownloadUrl());
+							getLog().debug("Using cached download: " + tempDownloadFile.getCanonicalPath());
+						} else {
+							// create a temporary download file
+							tempDownloadFile = File.createTempFile(artifactItem.getLocalFile(), "."
+								+ getExtension(downloadUrl));
 
-                            // download file from URL
-                            //FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
+							getLog().info("downloading artifact from URL: " + artifactItem.getDownloadUrl());
+							getLog().debug(
+								"downloading artifact to temporary file: " + tempDownloadFile.getCanonicalPath());
 
-                            //vharseko@openam.org.ru
-                            String endPointUrl = downloadUrl.getProtocol() + "://"+ downloadUrl.getAuthority();
-                            Repository repository = new Repository("additonal-configs", endPointUrl);
-                            Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
-                            if (getLog().isDebugEnabled())
-                            {
-                                Debug debug = new Debug();
-                                wagon.addSessionListener(debug);
-                                wagon.addTransferListener(debug);
-                            }
-                            wagon.setTimeout(artifactItem.getTimeout());
-                            settingsBuilder = new DefaultSettingsBuilder();
-                            Settings settings = settingsBuilder.build(new DefaultSettingsBuildingRequest()).getEffectiveSettings();
-                            ProxyInfo proxyInfo = null;
-                            if (settings != null && settings.getActiveProxy() != null)
-                            {
-                                Proxy settingsProxy = settings.getActiveProxy();
-                                proxyInfo = new ProxyInfo();
-                                proxyInfo.setHost(settingsProxy.getHost());
-                                proxyInfo.setType(settingsProxy.getProtocol());
-                                proxyInfo.setPort(settingsProxy.getPort());
-                                proxyInfo.setNonProxyHosts(settingsProxy.getNonProxyHosts());
-                                proxyInfo.setUserName(settingsProxy.getUsername());
-                                proxyInfo.setPassword(settingsProxy.getPassword());
-                            }
+							// download file from URL
+							// FileUtils.copyURLToFile(downloadUrl,
+							// tempDownloadFile);
 
-                            if (proxyInfo != null)
-                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
-                            else
-                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
+							// vharseko@openam.org.ru
+							String endPointUrl = downloadUrl.getProtocol() + "://" + downloadUrl.getAuthority();
+							Repository repository = new Repository("additonal-configs", endPointUrl);
+							Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
+							if (getLog().isDebugEnabled()) {
+								Debug debug = new Debug();
+								wagon.addSessionListener(debug);
+								wagon.addTransferListener(debug);
+							}
+							wagon.setTimeout(artifactItem.getTimeout());
+							settingsBuilder = new DefaultSettingsBuilder();
+							Settings settings = settingsBuilder.build(new DefaultSettingsBuildingRequest())
+								.getEffectiveSettings();
+							ProxyInfo proxyInfo = null;
+							if (settings != null && settings.getActiveProxy() != null) {
+								Proxy settingsProxy = settings.getActiveProxy();
+								proxyInfo = new ProxyInfo();
+								proxyInfo.setHost(settingsProxy.getHost());
+								proxyInfo.setType(settingsProxy.getProtocol());
+								proxyInfo.setPort(settingsProxy.getPort());
+								proxyInfo.setNonProxyHosts(settingsProxy.getNonProxyHosts());
+								proxyInfo.setUserName(settingsProxy.getUsername());
+								proxyInfo.setPassword(settingsProxy.getPassword());
+							}
 
-                            wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
+							if (proxyInfo != null)
+								wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),
+									proxyInfo);
+							else
+								wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
 
-                            getLog().debug(
-                                "caching temporary file for later");
-                            cachedDownloads.put(downloadUrl, tempDownloadFile);
-                        }
+							wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
 
-                        // verify file checksum (if a checksum was defined);
-                        // 'MojoFailureException' exception will be thrown if
-                        // verification fails
-                        //
-                        // Note: In theory, there might be conflicting checksums
-                        // configured for the same artifact; checksum
-                        // verification may thus be done several times for a
-                        // cached download.
-                        verifyArtifactItemChecksum(artifactItem,
-                            tempDownloadFile);
+							getLog().debug("caching temporary file for later");
+							cachedDownloads.put(downloadUrl, tempDownloadFile);
+						}
 
+						// verify file checksum (if a checksum was defined);
+						// 'MojoFailureException' exception will be thrown if
+						// verification fails
+						//
+						// Note: In theory, there might be conflicting checksums
+						// configured for the same artifact; checksum
+						// verification may thus be done several times for a
+						// cached download.
+						verifyArtifactItemChecksum(artifactItem, tempDownloadFile);
 
-                        // if this artifact is not configured to extract a file,
-                        // then
-                        // simply copy the downloaded file to the target
-                        // artifact file
-                        if (!artifactItem.hasExtractFile())
-                        {
-                            FileUtils.copyFile(tempDownloadFile, artifactFile);
-                            getLog().info(
-                                "copied downloaded artifact file to "
-                                    + "staging path: "
-                                    + artifactFile.getCanonicalPath());
-                        }
+						// if this artifact is not configured to extract a file,
+						// then
+						// simply copy the downloaded file to the target
+						// artifact file
+						if (!artifactItem.hasExtractFile()) {
+							FileUtils.copyFile(tempDownloadFile, artifactFile);
+							getLog().info(
+								"copied downloaded artifact file to " + "staging path: "
+									+ artifactFile.getCanonicalPath());
+						}
 
-                        // if this artifact is configured to extract a file,
-                        // then
-                        // extract the file from the downloaded ZIP file to the
-                        // target artifact file
-                        else
-                        {
-                            getLog().info(
-                                "extracting target file from downloaded "
-                                    + "compressed file: "
-                                    + artifactItem.getExtractFile());
+						// if this artifact is configured to extract a file,
+						// then
+						// extract the file from the downloaded ZIP file to the
+						// target artifact file
+						else {
+							getLog().info(
+								"extracting target file from downloaded " + "compressed file: "
+									+ artifactItem.getExtractFile());
 
-                            File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
-                            tempOutputDir.mkdirs();
-                            File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
+							File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
+							tempOutputDir.mkdirs();
+							File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
 
-                            UnArchiver unarchiver;
-                            try
-                            {
-                                try
-                                {
-                                    unarchiver = archiverManager.getUnArchiver(tempDownloadFile);
-                                }
-                                catch (NoSuchArchiverException e){
-                                    if (tempDownloadFile.getName().endsWith(".gz")){
-                                        unarchiver = archiverManager.getUnArchiver("gzip");
-                                        unarchiver.setDestFile(extractedFile);
-                                    }else
-                                        throw e;
-                                }
-                            }
-                            catch (NoSuchArchiverException e)
-                            {
-                                throw new MojoExecutionException( "Archive type, no unarchiver available for it", e);
-                            }
+							UnArchiver unarchiver;
+							try {
+								try {
+									unarchiver = archiverManager.getUnArchiver(tempDownloadFile);
+								} catch (NoSuchArchiverException e) {
+									if (tempDownloadFile.getName().endsWith(".gz")) {
+										unarchiver = archiverManager.getUnArchiver("gzip");
+										unarchiver.setDestFile(extractedFile);
+									} else
+										throw e;
+								}
+							} catch (NoSuchArchiverException e) {
+								throw new MojoExecutionException("Archive type, no unarchiver available for it", e);
+							}
 
-                            // ensure the path exists to write the file to
-                            File parentDirectory = artifactFile.getParentFile();
-                            if (parentDirectory != null && !parentDirectory.exists())
-                            {
-                                artifactFile.getParentFile().mkdirs();
-                            }
+							// ensure the path exists to write the file to
+							File parentDirectory = artifactFile.getParentFile();
+							if (parentDirectory != null && !parentDirectory.exists()) {
+								artifactFile.getParentFile().mkdirs();
+							}
 
-                            unarchiver.setSourceFile(tempDownloadFile);
-                            if (unarchiver.getDestFile()==null)
-                                unarchiver.setDestDirectory(tempOutputDir);
-                            unarchiver.extract();//will extract nothing, the file selector will do the trick
+							unarchiver.setSourceFile(tempDownloadFile);
+							if (unarchiver.getDestFile() == null)
+								unarchiver.setDestDirectory(tempOutputDir);
+							unarchiver.extract();// will extract nothing, the
+													// file selector will do the
+													// trick
 
+							// if a zip entry was not found, then throw a Mojo
+							// exception
 
+							if (extractedFile.isFile()) {
+								FileUtils.copyFile(extractedFile, artifactFile);
+							} else if (extractedFile.isDirectory() && artifactItem.isRepack()) {
+								Archiver archiver = archiverManager.getArchiver(artifactFile);
+								archiver.setDestFile(artifactFile);
+								archiver.addDirectory(extractedFile);
+								archiver.createArchive();
+							} else {
+								// checksum verification failed, throw error
+								throw new MojoFailureException("Could not find target artifact file to "
+									+ "extract from downloaded resouce: " + "\r\n   groupId      : "
+									+ artifact.getGroupId() + "\r\n   artifactId   : " + artifact.getArtifactId()
+									+ "\r\n   version      : " + artifact.getVersion() + "\r\n   extractFile  : "
+									+ artifactItem.getExtractFile() + "\r\n   download URL : "
+									+ artifactItem.getDownloadUrl());
+							}
 
-                            // if a zip entry was not found, then throw a Mojo
-                            // exception
+							getLog().info("extracted target file to staging path: " + artifactFile.getCanonicalPath());
+						}
 
-                            if (extractedFile.isFile())
-                            {
-                                FileUtils.copyFile(extractedFile, artifactFile);
-                            }
-                            else if (extractedFile.isDirectory()
-                                    && artifactItem.isRepack())
-                            {
-                                Archiver archiver = archiverManager.getArchiver(artifactFile);
-                                archiver.setDestFile(artifactFile);
-                                archiver.addDirectory(extractedFile);
-                                archiver.createArchive();
-                            }
-                            else
-                            {
-                                // checksum verification failed, throw error
-                                throw new MojoFailureException(
-                                    "Could not find target artifact file to "
-                                        + "extract from downloaded resouce: "
-                                        + "\r\n   groupId      : "
-                                        + artifact.getGroupId()
-                                        + "\r\n   artifactId   : "
-                                        + artifact.getArtifactId()
-                                        + "\r\n   version      : "
-                                        + artifact.getVersion()
-                                        + "\r\n   extractFile  : "
-                                        + artifactItem.getExtractFile()
-                                        + "\r\n   download URL : "
-                                        + artifactItem.getDownloadUrl());
-                            }
+						// update the artifact items local file property
+						artifactItem.setLocalFile(artifactFile.getCanonicalPath());
 
+						getLog().info("external artifact downloaded and staged: " + artifactItem.toString());
 
-                            getLog().info(
-                                "extracted target file to staging path: "
-                                    + artifactFile.getCanonicalPath());
-                        }
+						// if the acquired artifact listed in the project
+						// artifacts collection
+						// if(projectArtifacts.contains(artifact))
+						// {
+						// getLog().info("FOUND ARTIFACT IN PROJECT: " +
+						// artifact.toString());
+						// }
+					}
+				} else {
+					getLog().info(
+						"external artifact resolved in existing repository; " + "no download needed: "
+							+ artifactItem.toString());
+				}
+			}
 
-                        // update the artifact items local file property
-                        artifactItem.setLocalFile(artifactFile
-                            .getCanonicalPath());
+			// now we are done with the temporary files so lets
+			// delete them
+			for (File tempDownloadFile : cachedDownloads.values()) {
+				tempDownloadFile.delete();
+				getLog().debug("deleting temporary download file: " + tempDownloadFile.getCanonicalPath());
+			}
 
-                        getLog().info(
-                            "external artifact downloaded and staged: "
-                                + artifactItem.toString());
+			getLog().info("finished resolving all external dependencies");
 
-                        // if the acquired artifact listed in the project
-                        // artifacts collection
-                        // if(projectArtifacts.contains(artifact))
-                        // {
-                        // getLog().info("FOUND ARTIFACT IN PROJECT: " +
-                        // artifact.toString());
-                        // }
-                    }
-                }
-                else
-                {
-                    getLog().info(
-                        "external artifact resolved in existing repository; "
-                            + "no download needed: " + artifactItem.toString());
-                }
-            }
+		} catch (MojoFailureException e) {
+			throw e;
+		} catch (Exception e) {
+			getLog().error(e);
+			throw new MojoExecutionException(e.getMessage(), e);
+		}
+	}
 
-            // now we are done with the temporary files so lets
-            // delete them
-            for (File tempDownloadFile : cachedDownloads.values()) {
-                tempDownloadFile.delete();
-                getLog().debug(
-                    "deleting temporary download file: "
-                        + tempDownloadFile.getCanonicalPath());
-            }
+	private String getExtension(URL downloadUrl) {
+		String path = downloadUrl.getPath();
+		if (path.endsWith(".tar.gz")) {
+			return "tar.gz";
+		}
+		if (path.endsWith(".tar.bz2")) {
+			return "tar.bz2";
+		}
+		return FileUtils.getExtension(path);
+	}
 
-            getLog().info("finished resolving all external dependencies");
+	/**
+	 * resolve the artifact in local or remote repository
+	 *
+	 * @param artifactItem
+	 * @param artifact
+	 * @return
+	 * @throws MojoFailureException
+	 */
+	protected boolean resolveArtifactItem(Artifact artifact) throws MojoFailureException {
+		// determine if the artifact is already installed in an existing Maven
+		// repository
+		// Boolean artifactAlreadyInstalled =
+		// getLocalRepoFile(artifact).exists();
+		boolean artifactResolved = false;
+		ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+		request.setArtifact(artifact);
+		request.setRemoteRepositories(remoteRepositories);
+		request.setLocalRepository(localRepository);
+		return artifactResolver.resolve(request).isSuccess();
 
-        }
-        catch (MojoFailureException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            getLog().error(e);
-            throw new MojoExecutionException(e.getMessage(), e);
-        }
-    }
-
-    private String getExtension(URL downloadUrl)
-    {
-        String path = downloadUrl.getPath();
-        if(path.endsWith(".tar.gz")) {
-            return "tar.gz";
-        }
-        if(path.endsWith(".tar.bz2")) {
-            return "tar.bz2";
-        }
-        return FileUtils.getExtension(path);
-    }
-
-    /**
-     * resolve the artifact in local or remote repository
-     *
-     * @param artifactItem
-     * @param artifact
-     * @return
-     * @throws MojoFailureException
-     */
-    protected boolean resolveArtifactItem(Artifact artifact)
-        throws MojoFailureException
-    {
-        // determine if the artifact is already installed in an existing Maven
-        // repository
-        // Boolean artifactAlreadyInstalled =
-        // getLocalRepoFile(artifact).exists();
-        boolean artifactResolved = false;
-        ArtifactResolutionRequest request = new ArtifactResolutionRequest();
-        request.setArtifact(artifact);
-        request.setRemoteRepositories(remoteRepositories);
-        request.setLocalRepository(localRepository);
-        return artifactResolver.resolve(request).isSuccess();
-
-        /*try
-        {
-            artifactResolver.resolve(artifact, remoteRepositories, localRepository);
-            artifactResolved = true;
-        }
-        catch (ArtifactResolutionException e)
-        {
-            // REV 0.5-SNAPSHOT; 2011-04-30; RRS
-            //
-            // AS OF MAVEN V3, THIS EXCEPTION IS GETTING THROWN WHEN
-            // AN ATIFACT CANNOT BE RESOLVED IN THE LOCAL REPOSITORY,
-            // THUS CAUSING THE MAVEN BUILD TO FAIL AND NOT PERFORM
-            // THE EXTERNAL DEPENDENCY DOWNLOAD.
-            //
-            // checksum verification failed, throw error
-//            throw new MojoFailureException(
-//                "ArtifactResolutionException encountered while "
-//                    + "attempting to resolve artifact: "
-//                    + "\r\n   groupId    : " + artifact.getGroupId()
-//                    + "\r\n   artifactId : " + artifact.getArtifactId()
-//                    + "\r\n   version    : " + artifact.getVersion());
-
-            artifactResolved = false;
-        }
-        catch (ArtifactNotFoundException e)
-        {
-            artifactResolved = false;
-        }
-
-        return artifactResolved;*/
-    }
+		/*
+		 * try { artifactResolver.resolve(artifact, remoteRepositories,
+		 * localRepository); artifactResolved = true; } catch
+		 * (ArtifactResolutionException e) { // REV 0.5-SNAPSHOT; 2011-04-30;
+		 * RRS // // AS OF MAVEN V3, THIS EXCEPTION IS GETTING THROWN WHEN // AN
+		 * ATIFACT CANNOT BE RESOLVED IN THE LOCAL REPOSITORY, // THUS CAUSING
+		 * THE MAVEN BUILD TO FAIL AND NOT PERFORM // THE EXTERNAL DEPENDENCY
+		 * DOWNLOAD. // // checksum verification failed, throw error // throw
+		 * new MojoFailureException( //
+		 * "ArtifactResolutionException encountered while " // +
+		 * "attempting to resolve artifact: " // + "\r\n   groupId    : " +
+		 * artifact.getGroupId() // + "\r\n   artifactId : " +
+		 * artifact.getArtifactId() // + "\r\n   version    : " +
+		 * artifact.getVersion());
+		 *
+		 * artifactResolved = false; } catch (ArtifactNotFoundException e) {
+		 * artifactResolved = false; }
+		 *
+		 * return artifactResolved;
+		 */
+	}
 }

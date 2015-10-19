@@ -3,18 +3,16 @@ package com.ums.dependency.maven.archiver;
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.tar.TarArchiver;
 
-public class TarGZipArchiver extends TarArchiver
-{
-    public TarGZipArchiver() throws ArchiverException
-    {
-        this.setupCompressionMethod();
-    }
+public class TarGZipArchiver extends TarArchiver {
 
-    private void setupCompressionMethod() throws ArchiverException
-    {
+	public TarGZipArchiver() throws ArchiverException {
+		this.setupCompressionMethod();
+	}
 
-        TarCompressionMethod compression = TarCompressionMethod.gzip;
-        this.setCompression(compression);
-    }
+	private void setupCompressionMethod() throws ArchiverException {
+
+		TarCompressionMethod compression = TarCompressionMethod.gzip;
+		this.setCompression(compression);
+	}
 
 }

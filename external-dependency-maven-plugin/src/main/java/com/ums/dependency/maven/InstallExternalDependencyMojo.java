@@ -16,11 +16,10 @@ package com.ums.dependency.maven;
 
 import java.io.File;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.installer.ArtifactInstallationException;
 import org.apache.maven.artifact.installer.ArtifactInstaller;
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.install.DualDigester;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
 
 /**
@@ -38,153 +37,137 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
 	protected ArtifactInstaller installer;
 
 	/**
-	 * Digester for MD5 and SHA-1.
-	 *
-	 * @component default-value="md5"
-	 */
-	protected DualDigester digester;
-
-	/**
 	 * Flag whether to create checksums (MD5, SHA-1) or not.
 	 *
 	 * @parameter property="createChecksum" default-value="true"
 	 */
-	protected boolean createChecksum = true;
+	protected boolean createChecksum;
 
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
-		// Super class defaults to false so we set it
-		super.createChecksum = this.createChecksum;
 
-		try {
-			Boolean cachedCreateChecksums = this.createChecksum;
+		getLog().info("Installing external dependencies into local repository..");
 
-			getLog().info("starting to install external dependencies into local repository");
+		// Loop over and process all configured artifacts
+		for (ArtifactItem artifactItem : artifactItems) {
+			getLog().info(String.format("Resolving artifact %s for installation", artifactItem.toString()));
 
-			// loop over and process all configured artifacts
-			for (ArtifactItem artifactItem : artifactItems) {
-				getLog().info("resolving artifact for installation: " + artifactItem.toString());
+			// Create Maven artifact
+			Artifact artifact = createArtifact(artifactItem);
 
-				//
-				// CREATE MAVEN ARTIFACT
-				//
-				Artifact artifact = createArtifact(artifactItem);
+			// Determine if the artifact is already installed in the local Maven repository
+			Boolean artifactAlreadyInstalled = getLocalRepoFile(artifact).exists();
 
-				// determine if the artifact is already installed in the local
-				// Maven repository
-				Boolean artifactAlreadyInstalled = getLocalRepoFile(artifact).exists();
+			// Only proceed with this artifact if it is not already installed or it is configured to be forced.
+			if (!artifactAlreadyInstalled || force || artifactItem.getForce()) {
+				if (artifactItem.getForce()) {
+					getLog().debug(String.format("Artifact %s is flagged as a FORCED install", artifactItem.toString()));
+				}
 
-				// only proceed with this artifact if it is not already
-				// installed or it is configured to be forced.
-				if (!artifactAlreadyInstalled || artifactItem.getForce() || force) {
-					if (artifactItem.getForce()) {
-						getLog().debug("this artifact is flagged as a FORCED install: " + artifactItem.toString());
-					}
-
-					// ensure the artifact file is located in the staging
-					// directory
-					File stagedArtifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
-					if (stagedArtifactFile.exists()) {
-						// if this artifact is configured to extract a file,
-						// then the checksum verification will need to take
-						// place
-						// if there is a separate extract file checksum property
-						// defined
-						if (artifactItem.hasExtractFile()) {
-							if (artifactItem.hasExtractFileChecksum()) {
-								// verify extracted file checksum (if an extract
-								// file checksum was defined);
-								// 'MojoFailureException' exception will be
-								// thrown if
-								// verification fails
-								verifyArtifactItemExtractFileChecksum(artifactItem, stagedArtifactFile);
-							}
-						}
-
-						// if this is not an extracted file, then verify the
-						// downloaded file using the regular checksum property
-						else {
-							// verify file checksum (if a checksum was defined);
-							// 'MojoFailureException' exception will be thrown
-							// if verification fails
-							verifyArtifactItemChecksum(artifactItem, stagedArtifactFile);
-						}
-
-						// perform Sonatype REST query to ensure that this
-						// artifacts checksum
-						// is not resolved to an existing artifact already
-						// hosted in another
-						// Maven repository
-						verifyArtifactItemChecksumBySonatypeLookup(artifactItem, stagedArtifactFile);
-
-						//
-						// INSTALL MAVEN ARTIFACT TO LOCAL REPOSITORY
-						//
-						if (artifact != null && artifactItem.getInstall()) {
-							// create Maven artifact POM file
-							File generatedPomFile = null;
-
-							// don't generate a POM file for POM artifacts
-							if (!"pom".equals(artifactItem.getPackaging())) {
-								// if a POM file was provided for the artifact
-								// item, then
-								// use that POM file instead of generating a new
-								// one
-								if (artifactItem.getPomFile() != null) {
-									ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
-										artifactItem.getPomFile());
-									getLog().debug("installing defined POM file: " + artifactItem.getPomFile());
-									artifact.addMetadata(pomMetadata);
-								} else {
-									// dynamically create a new POM file for
-									// this artifact
-									generatedPomFile = generatePomFile(artifactItem);
-									ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
-										generatedPomFile);
-
-									if (artifactItem.getGeneratePom() == true) {
-										getLog().debug(
-											"installing generated POM file: " + generatedPomFile.getCanonicalPath());
-										artifact.addMetadata(pomMetadata);
-									}
-								}
-							}
-
-							getLog().info("installing artifact into local repository: " + localRepository.getId());
-
-							// install artifact to local repository
-							installer.install(stagedArtifactFile, artifact, localRepository);
-
-							// install checksum files to local repository
-							if (artifactItem.getCreateChecksum() != null) {
-								super.createChecksum = artifactItem.getCreateChecksum().equalsIgnoreCase("true");
-							} else {
-								super.createChecksum = cachedCreateChecksums;
-							}
-							installChecksums(artifact, true);
-						} else {
-							getLog().debug("configured to not install artifact: " + artifactItem.toString());
+				// Ensure the artifact file is located in the staging directory
+				File stagedArtifactFile = getFullyQualifiedArtifactFilePath(artifactItem);
+				if (stagedArtifactFile.exists()) {
+					if (artifactItem.hasExtractFile()) {
+						/*
+						 * If this artifact is configured to extract a file,
+						 * then the checksum verification will need to take
+						 * place if there is a separate extract file checksum
+						 * property defined
+						 */
+						if (artifactItem.hasExtractFileChecksum()) {
+							/*
+							 * Verify extracted file checksum (if an extract
+							 * file checksum was defined). MojoFailureException
+							 * exception will be thrown if verification fails
+							 */
+							verifyArtifactItemExtractFileChecksum(artifactItem, stagedArtifactFile);
 						}
 					} else {
-						// throw error because we were unable to install the
-						// external dependency
-						throw new MojoFailureException("Unable to install external dependency '"
-							+ artifactItem.getArtifactId() + "'; file not found in staging path: "
-							+ stagedArtifactFile.getCanonicalPath());
+						/*
+						 * If this is not an extracted file, then verify the
+						 * downloaded file using the regular checksum property
+						 *
+						 * Verify file checksum (if a checksum was defined).
+						 * MojoFailureException exception will be thrown if
+						 * verification fails
+						 */
+						verifyArtifactItemChecksum(artifactItem, stagedArtifactFile);
+					}
+
+					/*
+					 * perform search.maven.org REST query to ensure that this
+					 * artifacts checksum is not resolved to an existing
+					 * artifact already hosted in another Maven repository
+					 */
+					verifyArtifactItemChecksumByCentralLookup(artifactItem, stagedArtifactFile);
+
+					// Install Maven artifact to local repository
+					if (artifact != null && artifactItem.getInstall()) {
+						// Create Maven artifact POM file
+						File generatedPomFile = null;
+
+						// Don't generate a POM file for POM artifacts
+						if (!"pom".equals(artifactItem.getPackaging())) {
+							/*
+							 * if a POM file was provided for the artifact
+							 * item, then use that POM file instead of
+							 * generating a new one
+							 */
+							if (artifactItem.getPomFile() != null) {
+								ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
+									artifactItem.getPomFile());
+								getLog().debug("Installing defined POM file: " + artifactItem.getPomFile());
+								artifact.addMetadata(pomMetadata);
+							} else {
+								// Dynamically create a new POM file for this artifact
+								generatedPomFile = generatePomFile(artifactItem);
+								ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact, generatedPomFile);
+
+								if (artifactItem.getGeneratePom() == true) {
+									getLog().debug(
+										"installing generated POM file: " + generatedPomFile.getAbsolutePath());
+									artifact.addMetadata(pomMetadata);
+								}
+							}
+						}
+
+						getLog().info("Installing artifact into local repository: " + localRepository.getId());
+
+						// Install artifact to local repository
+						try {
+							installer.install(stagedArtifactFile, artifact, localRepository);
+						} catch (ArtifactInstallationException e) {
+							throw new MojoExecutionException(
+								"Could not install artifact " + artifact.toString() + " to local repository: " + e.getMessage(), e
+							);
+						}
+
+						// Install checksum files to local repository
+						if (artifactItem.getCreateChecksum() != null) {
+							super.createChecksum = artifactItem.getCreateChecksum().equalsIgnoreCase("true");
+						} else {
+							super.createChecksum = this.createChecksum;
+						}
+						installChecksums(artifact, super.createChecksum);
+					} else {
+						getLog().debug("Configured to not install artifact: " + artifactItem.toString());
 					}
 				} else {
-					getLog().info(
-						"this aritifact already exists in the local repository; no download is needed: "
-							+ artifactItem.toString());
+					// Throw error because we were unable to install the external dependency
+					throw new MojoFailureException(
+						"Unable to install external dependency \"" + artifactItem.getArtifactId() +
+						"\"; file not found in staging path: " + stagedArtifactFile.getAbsolutePath() + NEWLINE +
+						"Make sure \"resolve\" goal has been executed before \"install\"."
+					);
 				}
+			} else {
+				getLog().info(String.format(
+					"Aritifact %s already exists in the local repository; no download is needed",
+					artifactItem.toString()
+				));
 			}
-
-			getLog().info("finished installing all external dependencies into local repository");
-		} catch (MojoFailureException e) {
-			throw e;
-		} catch (Exception e) {
-			getLog().error(e);
-			throw new MojoExecutionException(e.getMessage(), e);
 		}
+
+		getLog().info("Finished installing all external dependencies into local repository");
 	}
 }

@@ -89,11 +89,6 @@ public class ResolveExternalDependencyMojo extends
      */
     private WagonManager wagonManager;
 
-    /**
-     * @component
-     * @required
-     * @readonly
-     */
     private DefaultSettingsBuilder settingsBuilder;
 
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -139,14 +134,12 @@ public class ResolveExternalDependencyMojo extends
 
                 // only proceed with this artifact if it is not already
                 // installed or it is configured to be forced.
-                if (!artifactResolved || (artifactItem.getForce() && !artifactFile.exists()) || (force && !artifactFile.exists()) )
-                {
+                if (!artifactResolved || (!artifactFile.exists() && (force || artifactItem.getForce()))) {
+                //if (!artifactResolved || (artifactItem.getForce() && !artifactFile.exists()) || (force && !artifactFile.exists())) {
 
                     if (artifactItem.getForce())
                     {
-                        getLog().debug(
-                            "this artifact is flagged as a FORCED download: "
-                                + artifactItem.toString());
+                        getLog().debug("this artifact is flagged as a FORCED download: " + artifactItem.toString());
                     }
 
                     //

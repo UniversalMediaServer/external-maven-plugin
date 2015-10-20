@@ -4,7 +4,7 @@
     <component>
       <role>org.codehaus.plexus.archiver.Archiver</role>
       <role-hint>tar.gz</role-hint>
-      <implementation>com.savage7.maven.plugin.dependency.archiver.TarGZipArchiver</implementation>
+      <implementation>com.ums.dependency.maven.archiver.TarGZipArchiver</implementation>
       <instantiation-strategy>per-lookup</instantiation-strategy>
     </component>
   </components>

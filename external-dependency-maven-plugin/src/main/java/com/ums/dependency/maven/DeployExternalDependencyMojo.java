@@ -15,15 +15,10 @@
 package com.ums.dependency.maven;
 
 import java.io.File;
-import java.io.IOException;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.deployer.ArtifactDeployer;
 import org.apache.maven.artifact.deployer.ArtifactDeploymentException;
-import org.apache.maven.artifact.metadata.ArtifactMetadata;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.artifact.ProjectArtifactMetadata;
@@ -32,148 +27,114 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
  * Deploy external dependencies to distribution management defined repository.
  *
  * @goal deploy
+ * @phase deploy
  * @category Maven Plugin
  * @ThreadSafe
  */
 public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
 	/**
-	 * @parameter expression="${localRepository}"
-	 * @required
-	 * @readonly
-	 */
-	protected ArtifactRepository localRepository;
-
-	/**
-	 * Used to look up Artifacts in the remote repository.
-	 *
-	 * @component
-	 */
-	protected ArtifactResolver artifactResolver;
-
-	/**
 	 * @component
 	 */
 	private ArtifactDeployer artifactDeployer;
 
-	/**
-	 * Flag whether Maven is currently in online/offline mode.
-	 *
-	 * @parameter default-value="${settings.offline}"
-	 * @readonly
-	 */
-	private boolean offline;
-
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		super.execute();
 
-		getLog().info("starting to deploy external dependencies to distribution repository");
+		getLog().info("Starting to deploy external dependencies to distribution repository");
 
-		// loop over and process all configured artifacts
+		// Loop over and process all configured artifacts
 		for (ArtifactItem artifactItem : artifactItems) {
-			getLog().info("resolving artifact in locale repository for deployment: " + artifactItem.toString());
+			getLog().info("Resolving artifact in locale repository for deployment: " + artifactItem.toString());
 
-			//
-			// CREATE MAVEN ARTIFACT
-			//
+			// Create Maven artifact
 			Artifact artifact = createArtifact(artifactItem);
 
-			// determine if the artifact is already installed in the local Maven
-			// repository
+			// Determine if the artifact is already installed in the local Maven repository
 			File installedArtifactFile = getLocalRepoFile(artifact);
 
-			// only proceed with this artifact if it is not already
-			// installed or it is configured to be forced.
+			// Only proceed with this artifact if it is installed in the local repository.
 			if (installedArtifactFile.exists()) {
-				try {
-					artifactResolver.resolve(artifact, project.getRemoteArtifactRepositories(), localRepository);
+				if (!resolveArtifactItem(artifact)) {
+					throw new MojoExecutionException(
+						"Could not resolve artifact " + artifact.toString() + NEWLINE +
+						"Make sure \"resolve\" and \"install\" goals has been executed first"
+					);
+				}
 
-					//
-					// DEPLOY TO DISTRIBUTION MAVEN REPOSITORY
-					//
-					if (artifactItem.getDeploy()) {
-						failIfOffline();
+				// Deploy to distribution Maven repository
+				if (artifactItem.getDeploy()) {
 
-						ArtifactRepository repo = getDeploymentRepository();
+					ArtifactRepository repo = getDeploymentRepository();
 
-						String protocol = repo.getProtocol();
+					String protocol = repo.getProtocol();
 
-						if (protocol.equalsIgnoreCase("scp")) {
-							File sshFile = new File(System.getProperty("user.home"), ".ssh");
+					if (protocol.equalsIgnoreCase("scp")) {
+						File sshFolder = new File(System.getProperty("user.home"), ".ssh");
 
-							if (!sshFile.exists()) {
-								sshFile.mkdirs();
-							}
+						if (!sshFolder.exists()) {
+							sshFolder.mkdirs();
 						}
-
-						// create Maven artifact POM file
-						File generatedPomFile = null;
-
-						// don't generate a POM file for POM artifacts
-						if (!"pom".equals(artifactItem.getPackaging())) {
-							// if a POM file was provided for the artifact item,
-							// then
-							// use that POM file instead of generating a new one
-							if (artifactItem.getPomFile() != null) {
-								ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
-									artifactItem.getPomFile());
-								artifact.addMetadata(pomMetadata);
-							} else {
-								// dynamically create a new POM file for this
-								// artifact
-								generatedPomFile = generatePomFile(artifactItem);
-								ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact, generatedPomFile);
-
-								if (artifactItem.getGeneratePom() == true) {
-									artifact.addMetadata(pomMetadata);
-								}
-							}
-
-						}
-
-						// deploy now
-						getLog().info("deploying artifact to distribution repository: " + artifactItem.toString());
-						artifactDeployer.deploy(artifact.getFile(), artifact, repo, localRepository);
-
-						// TODO Deploy Checksums?
-					} else {
-						getLog().debug("configured to not deploy artifact: " + artifactItem.toString());
 					}
-				} catch (MojoFailureException e) {
-					throw e;
-				} catch (ArtifactResolutionException e) {
-					throw new MojoExecutionException("Error occurred while attempting to resolve artifact.", e);
-				} catch (ArtifactNotFoundException e) {
-					throw new MojoExecutionException("Unable to find external dependency in local repository.", e);
-				} catch (ArtifactDeploymentException e) {
-					throw new MojoExecutionException("Deployment of external dependency failed.", e);
-				}
 
-			} else {
-				// throw error because we were unable to find the installed
-				// external dependency
-				try {
-					throw new MojoFailureException("Unable to find external dependency '"
-						+ artifactItem.getArtifactId() + "'; file not found in local repository: "
-						+ installedArtifactFile.getCanonicalPath());
-				} catch (IOException e) {
-					throw new MojoExecutionException("Unable to resolve dependency path in locale repository.", e);
+					// Create Maven artifact POM file
+					File generatedPomFile = null;
+
+					// Don't generate a POM file for POM artifacts
+					if (!"pom".equals(artifactItem.getPackaging())) {
+						if (artifactItem.getPomFile() != null) {
+							/*
+							 * If a POM file was provided for the artifact
+							 * item, then use that POM file instead of
+							 * generating a new one
+							 */
+							ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
+								artifactItem.getPomFile());
+							artifact.addMetadata(pomMetadata);
+						} else {
+							// Dynamically create a new POM file for this artifact
+							generatedPomFile = generatePomFile(artifactItem);
+							ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact, generatedPomFile);
+
+							if (artifactItem.getGeneratePom() == true) {
+								artifact.addMetadata(pomMetadata);
+							}
+						}
+
+					}
+
+					// Deploy now
+					getLog().info("Deploying artifact to distribution repository: " + artifactItem.toString());
+					try {
+						artifactDeployer.deploy(artifact.getFile(), artifact, repo, localRepository);
+					} catch (ArtifactDeploymentException e) {
+						throw new MojoExecutionException("Deployment of external dependency failed with: " + e.getMessage(), e);
+					}
+				} else {
+					getLog().debug("Configured to not deploy artifact: " + artifactItem.toString());
 				}
+			} else {
+				// Throw exception because we were unable to find the installed external dependency
+				throw new MojoExecutionException(
+					"Unable to find external dependency \"" + artifactItem.getArtifactId() +
+					"\"; file not found in local repository: " + installedArtifactFile.getAbsolutePath()
+				);
 			}
 		}
 
-		getLog().info("finished deploying external dependencies to distribution repository");
+		getLog().info("Finished deploying external dependencies to distribution repository");
 	}
 
 	/**
 	 * Gets the repository defined in project POM's distribution management
 	 * section
 	 *
-	 * @return deployment repository defined in distribution management
+	 * @return
+	 * 			Deployment repository defined in distribution management
+	 *
 	 * @throws MojoExecutionException
-	 * @throws MojoFailureException
 	 */
-	private ArtifactRepository getDeploymentRepository() throws MojoExecutionException, MojoFailureException {
+	private ArtifactRepository getDeploymentRepository() throws MojoExecutionException {
 		ArtifactRepository repo = null;
 
 		if (repo == null) {
@@ -181,24 +142,11 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
 		}
 
 		if (repo == null) {
-			String msg = "Deployment failed: repository element was not specified in the POM inside"
-				+ " distributionManagement element";
-
-			throw new MojoExecutionException(msg);
+			throw new MojoExecutionException(
+				"Deployment failed: Repository element was not specified in the POM inside distributionManagement element"
+			);
 		}
 
 		return repo;
-	}
-
-	/**
-	 * Checks for offline mode; throws exception if offline, deploy goal cannot
-	 * proceed
-	 *
-	 * @throws MojoFailureException
-	 */
-	private void failIfOffline() throws MojoFailureException {
-		if (offline) {
-			throw new MojoFailureException("Cannot deploy artifacts when Maven is in offline mode");
-		}
 	}
 }

@@ -19,14 +19,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.manager.WagonConfigurationException;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
-import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.settings.Proxy;
@@ -58,22 +54,6 @@ import org.codehaus.plexus.util.FileUtils;
  * @ThreadSafe
  */
 public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMojo {
-
-	/**
-	 * Used to look up Artifacts in the remote repository.
-	 *
-	 * @component
-	 */
-	protected ArtifactResolver artifactResolver;
-
-	/**
-	 * List of Remote Repositories used by the resolver
-	 *
-	 * @parameter default-value="${project.remoteArtifactRepositories}"
-	 * @readonly
-	 * @required
-	 */
-	protected List<ArtifactRepository> remoteRepositories;
 
 	/**
 	 * @component
@@ -109,8 +89,6 @@ public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMoj
 			/*
 			 * Determine if the artifact is already installed in an existing Maven repository
 			 */
-			// Boolean artifactAlreadyInstalled =
-			// getLocalRepoFile(artifact).exists();
 			boolean artifactResolved = resolveArtifactItem(artifact);
 
 			/*
@@ -381,47 +359,5 @@ public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMoj
 			return "tar.bz2";
 		}
 		return FileUtils.getExtension(path);
-	}
-
-	/**
-	 * resolve the artifact in local or remote repository
-	 *
-	 * @param artifactItem
-	 * @param artifact
-	 * @return
-	 * @throws MojoFailureException
-	 */
-	protected boolean resolveArtifactItem(Artifact artifact) throws MojoFailureException {
-		// determine if the artifact is already installed in an existing Maven
-		// repository
-		// Boolean artifactAlreadyInstalled =
-		// getLocalRepoFile(artifact).exists();
-		//boolean artifactResolved = false;
-		ArtifactResolutionRequest request = new ArtifactResolutionRequest();
-		request.setArtifact(artifact);
-		request.setRemoteRepositories(remoteRepositories);
-		request.setLocalRepository(localRepository);
-		return artifactResolver.resolve(request).isSuccess();
-
-		/*
-		 * try { artifactResolver.resolve(artifact, remoteRepositories,
-		 * localRepository); artifactResolved = true; } catch
-		 * (ArtifactResolutionException e) { // REV 0.5-SNAPSHOT; 2011-04-30;
-		 * RRS // // AS OF MAVEN V3, THIS EXCEPTION IS GETTING THROWN WHEN // AN
-		 * ATIFACT CANNOT BE RESOLVED IN THE LOCAL REPOSITORY, // THUS CAUSING
-		 * THE MAVEN BUILD TO FAIL AND NOT PERFORM // THE EXTERNAL DEPENDENCY
-		 * DOWNLOAD. // // checksum verification failed, throw error // throw
-		 * new MojoFailureException( //
-		 * "ArtifactResolutionException encountered while " // +
-		 * "attempting to resolve artifact: " // + "\r\n   groupId    : " +
-		 * artifact.getGroupId() // + "\r\n   artifactId : " +
-		 * artifact.getArtifactId() // + "\r\n   version    : " +
-		 * artifact.getVersion());
-		 *
-		 * artifactResolved = false; } catch (ArtifactNotFoundException e) {
-		 * artifactResolved = false; }
-		 *
-		 * return artifactResolved;
-		 */
 	}
 }

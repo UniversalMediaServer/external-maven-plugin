@@ -108,12 +108,12 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
 
 						// Don't generate a POM file for POM artifacts
 						if (!"pom".equals(artifactItem.getPackaging())) {
-							/*
-							 * if a POM file was provided for the artifact
-							 * item, then use that POM file instead of
-							 * generating a new one
-							 */
 							if (artifactItem.getPomFile() != null) {
+								/*
+								 * If a POM file was provided for the artifact
+								 * item, then use that POM file instead of
+								 * generating a new one
+								 */
 								ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
 									artifactItem.getPomFile());
 								getLog().debug("Installing defined POM file: " + artifactItem.getPomFile());
@@ -162,7 +162,7 @@ public class InstallExternalDependencyMojo extends AbstractExternalDependencyMoj
 				}
 			} else {
 				getLog().info(String.format(
-					"Aritifact %s already exists in the local repository; no download is needed",
+					"Aritifact %s already exists in the local repository; no installation is needed",
 					artifactItem.toString()
 				));
 			}

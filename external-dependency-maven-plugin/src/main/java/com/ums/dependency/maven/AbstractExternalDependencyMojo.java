@@ -23,11 +23,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
+import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -77,6 +81,27 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * @required
 	 */
 	protected ArrayList<ArtifactItem> artifactItems;
+
+	/**
+	 * Used to look up Artifacts in the remote repository.
+	 *
+	 * @component
+	 */
+	protected ArtifactResolver artifactResolver;
+
+	/**
+	 * List of Remote Repositories used by the resolver
+	 *
+	 * @parameter default-value="${project.remoteArtifactRepositories}"
+	 * @readonly
+	 * @required
+	 */
+	protected List<ArtifactRepository> remoteRepositories;
+
+	/**
+	 * @component role="org.apache.maven.artifact.manager.WagonManager"
+	 */
+	protected WagonManager wagonManager;
 
 	/**
 	 * @parameter default-value="${project}"
@@ -541,5 +566,22 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 			request.setGlobalSettingsFile(new File(globalSettings));
 		}
 		return request;
+	}
+
+	/**
+	 * resolve the artifact in local or remote repository
+	 *
+	 * @param artifact the artifact to resolve
+	 * @return
+	 * 			Whether or not the artifact was resolved
+	 * @throws MojoFailureException
+	 */
+	protected boolean resolveArtifactItem(Artifact artifact) {
+		// Determine if the artifact is already installed in an existing Maven repository
+		ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+		request.setArtifact(artifact);
+		request.setRemoteRepositories(remoteRepositories);
+		request.setLocalRepository(localRepository);
+		return artifactResolver.resolve(request).isSuccess();
 	}
 }

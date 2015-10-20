@@ -26,6 +26,7 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
  * Install external dependencies to local repository.
  *
  * @goal install
+ * @phase generate-sources
  * @category Maven Plugin
  * @ThreadSafe
  */

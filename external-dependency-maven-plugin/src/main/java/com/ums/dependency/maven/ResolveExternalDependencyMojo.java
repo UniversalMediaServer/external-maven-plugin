@@ -50,6 +50,7 @@ import org.codehaus.plexus.util.FileUtils;
  * Download/Acquire external Maven artifacts, copy to staging directory.
  *
  * @goal resolve
+ * @phase generate-sources
  * @category Maven Plugin
  * @ThreadSafe
  */

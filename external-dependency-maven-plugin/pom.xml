@@ -90,7 +90,7 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.3</version>
 				<configuration>
-					<goalPrefix>external-dependency</goalPrefix>
+					<goalPrefix>external</goalPrefix>
 				</configuration>
             </plugin>
             <plugin>

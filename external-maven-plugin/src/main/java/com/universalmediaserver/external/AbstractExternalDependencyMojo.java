@@ -17,7 +17,7 @@
  * under the License.
  **/
 
-package com.ums.dependency.maven;
+package com.universalmediaserver.external;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.ums.dependency.maven.archiver;
+package com.universalmediaserver.external.archiver;
 
 import org.codehaus.plexus.archiver.ArchiverException;
 import org.codehaus.plexus.archiver.tar.TarArchiver;

@@ -12,7 +12,7 @@
  * governing permissions and limitations under the License.
  **/
 
-package com.ums.dependency.maven;
+package com.universalmediaserver.external;
 
 import java.io.File;
 import org.apache.maven.artifact.Artifact;

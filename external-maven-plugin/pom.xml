@@ -19,25 +19,17 @@ under the License.
 --> 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.ums.maven</groupId>
-    <artifactId>external-dependency-maven-plugin</artifactId>
+    <groupId>com.universalmediaserver</groupId>
+    <artifactId>external-maven-plugin</artifactId>
     <version>0.1-SNAPSHOT</version>
     <name>External Dependency Maven Plugin</name>
-    <url>https://github.com/Nadahar/external-dependency-maven-plugin</url>
+    <url>https://github.com/Nadahar/external-maven-plugin</url>
     <inceptionYear>2015</inceptionYear>
     <description>This is a fork of &quot;Maven External Dependency Plugin&quot;, http://code.google.com/p/maven-external-dependency-plugin/
 
 This Maven plugin allows downloading, installing, and deploying dependency artifacts that are not stored in a Maven repository.</description>
     <packaging>maven-plugin</packaging>
     <developers>
-        <developer> 
-            <name>Robert Savage</name>
-            <email>robert@savage7.com</email>
-            <roles>
-                <role>owner</role>
-            </roles>
-            <url>http://www.savage7.com</url>
-        </developer>
         <developer>
         	<name>Nadahar</name>
         	<timezone>1</timezone>
@@ -45,6 +37,14 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
         </developer>
     </developers>
     <contributors>
+      <contributor>
+        <name>Robert Savage</name>
+        <email>robert@savage7.com</email>
+        <roles>
+            <role>Original developer</role>
+        </roles>
+        <url>http://www.savage7.com</url>
+      </contributor>
       <contributor>
         <name>Marvin Froeder</name>
         <email>velo.br@gmail.com</email>
@@ -63,7 +63,7 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
     </contributors>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/Nadahar/external-dependency-maven-plugin/issues</url>
+        <url>https://github.com/Nadahar/external-maven-plugin/issues</url>
     </issueManagement>    
 	<licenses>
 	  <license>
@@ -247,9 +247,9 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
     <!--  SOURCE CONTROL -->
 
     <scm>
-        <connection>https://github.com/Nadahar/external-dependency-maven-plugin.git</connection>
-        <developerConnection>scm:git:git://github.com/Nadahar/external-dependency-maven-plugin.git</developerConnection>
-        <url>http://github.com/Nadahar/external-dependency-maven-plugin</url>
+        <connection>https://github.com/Nadahar/external-maven-plugin.git</connection>
+        <developerConnection>scm:git:git://github.com/Nadahar/external-maven-plugin.git</developerConnection>
+        <url>http://github.com/Nadahar/external-maven-plugin</url>
     </scm>
 
         

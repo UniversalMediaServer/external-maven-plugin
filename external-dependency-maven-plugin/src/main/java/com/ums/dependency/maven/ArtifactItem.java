@@ -21,7 +21,13 @@ import org.codehaus.plexus.util.StringUtils;
  * ArtifactItem represents information specified in the plugin configuration
  * section for each artifact.
  *
- * @ThreadSafe
+ * Please note:
+ * This class is not at Mojo and variables are not parsed as such. The
+ * mojo annotations are therefore without any effect and defaults must
+ * be initialized like in any Java class. Setters are called after
+ * initialization overwriting the defaults.
+ *
+ * The annotations is kept to improve readability though
  */
 
 public class ArtifactItem {
@@ -50,7 +56,7 @@ public class ArtifactItem {
 	private String version = null;
 
 	/**
-	 * Classifier for Artifact (tests,sources,etc).
+	 * Classifier for Artifact (tests, sources, etc).
 	 *
 	 * @parameter
 	 */
@@ -80,7 +86,7 @@ public class ArtifactItem {
 	private String downloadUrl;
 
 	/**
-	 * Timeout in millis allowed for artifact download
+	 * Timeout in milliseconds allowed for artifact download
 	 *
 	 * @parameter
 	 */
@@ -90,36 +96,35 @@ public class ArtifactItem {
 	 * Packaging type of the artifact to be installed.
 	 *
 	 * @parameter default-value="jar"
-	 * @required
 	 */
-	private String packaging;
+	private String packaging = "jar";
 
 	/**
 	 * Installs the artifact into the local maven repository.
 	 *
 	 * @parameter default-value="true"
 	 */
-	private Boolean install = true;
+	private boolean install = true;
 
 	/**
 	 * Deploys the artifact to a remote maven repository.
 	 *
 	 * @parameter default-value="true"
 	 */
-	private Boolean deploy = true;
+	private boolean deploy = true;
 
 	/**
 	 * Forces a download, maven install, maven deploy.
 	 *
 	 * @parameter default-value="false"
 	 */
-	private Boolean force = false;
+	private boolean force = false;
 
 	/**
 	 * Location of an existing POM file to be installed alongside the main
 	 * artifact, given by the {@link #file} parameter.
 	 *
-	 * @parameter expression="${pomFile}"
+	 * @parameter
 	 */
 	private File pomFile;
 
@@ -128,25 +133,25 @@ public class ArtifactItem {
 	 * parameter {@link #pomFile}. Defaults to <code>true</code> if there is no
 	 * existing POM in the local repository yet.
 	 *
-	 * @parameter expression="${generatePom}" default-value="true"
+	 * @parameter default-value="true"
 	 */
-	private Boolean generatePom = true;
+	private boolean generatePom = true;
 
 	/**
 	 * Flag whether to create checksums (MD5, SHA-1) or not.
 	 *
-	 * @parameter expression="${createChecksum}"
+	 * @parameter
 	 */
-	private String createChecksum;
+	private Boolean createChecksum = null;
 
 	/**
-	 * If this property is set to true, then the downloaded file's checksum will
-	 * not be verified using the Sonatype artifact query by checksum validation
-	 * routine.
+	 * If this property is set to true, the downloaded file's checksum will be
+	 * verified with a query against Maven Central Repository to make sure the
+	 * artifact isn't already there.
 	 *
 	 * @parameter default-value="false"
 	 */
-	private Boolean skipChecksumVerification = false;
+	private boolean centralChecksumVerification = false;
 
 	/**
 	 * Checksum for Artifact.
@@ -170,9 +175,9 @@ public class ArtifactItem {
 	private String extractFileChecksum;
 
 	/**
-	 * In case you need to repack an directory as a new artifact
+	 * In case you need to repack a directory as a new artifact
 	 *
-	 * @parameter
+	 * @parameter default-value="false"
 	 */
 	private boolean repack = false;
 
@@ -215,7 +220,7 @@ public class ArtifactItem {
 	/**
 	 * @return Returns the artifactId.
 	 */
-	public final String getArtifactId() {
+	public String getArtifactId() {
 		return artifactId;
 	}
 
@@ -225,14 +230,14 @@ public class ArtifactItem {
 	 * @param artifact
 	 *            item to set
 	 */
-	public final void setArtifactId(final String artifact) {
+	public void setArtifactId(final String artifact) {
 		this.artifactId = filterEmptyString(artifact);
 	}
 
 	/**
 	 * @return Returns the groupId.
 	 */
-	public final String getGroupId() {
+	public String getGroupId() {
 		return groupId;
 	}
 
@@ -240,21 +245,21 @@ public class ArtifactItem {
 	 * @param groupId
 	 *            The groupId to set.
 	 */
-	public final void setGroupId(final String groupId) {
+	public void setGroupId(final String groupId) {
 		this.groupId = filterEmptyString(groupId);
 	}
 
 	/**
 	 * @return Returns the type.
 	 */
-	public final String getType() {
+	public String getType() {
 		return getPackaging();
 	}
 
 	/**
 	 * @return Returns the version.
 	 */
-	public final String getVersion() {
+	public String getVersion() {
 		return version;
 	}
 
@@ -262,14 +267,14 @@ public class ArtifactItem {
 	 * @param version
 	 *            The version to set.
 	 */
-	public final void setVersion(final String version) {
+	public void setVersion(final String version) {
 		this.version = filterEmptyString(version);
 	}
 
 	/**
 	 * @return Classifier.
 	 */
-	public final String getClassifier() {
+	public String getClassifier() {
 		return classifier;
 	}
 
@@ -277,7 +282,7 @@ public class ArtifactItem {
 	 * @param classifier
 	 *            Classifier.
 	 */
-	public final void setClassifier(final String classifier) {
+	public void setClassifier(final String classifier) {
 		this.classifier = filterEmptyString(classifier);
 	}
 
@@ -286,7 +291,7 @@ public class ArtifactItem {
 	 *
 	 * @return result string
 	 */
-	public final String toString() {
+	public String toString() {
 		if (this.classifier == null) {
 			return groupId + ":" + artifactId + ":" + StringUtils.defaultString(version, "?") + ":" + packaging;
 		} else {
@@ -298,7 +303,7 @@ public class ArtifactItem {
 	/**
 	 * @return Returns the location.
 	 */
-	public final String getLocalFile() {
+	public String getLocalFile() {
 		return replaceTokens(localFile);
 	}
 
@@ -306,14 +311,14 @@ public class ArtifactItem {
 	 * @param localFile
 	 *            The localFile to set.
 	 */
-	public final void setLocalFile(final String localFile) {
+	public void setLocalFile(final String localFile) {
 		this.localFile = filterEmptyString(localFile);
 	}
 
 	/**
 	 * @return Returns the stagingDirectory.
 	 */
-	public final String getStagingDirectory() {
+	public String getStagingDirectory() {
 		return replaceTokens(stagingDirectory);
 	}
 
@@ -321,14 +326,14 @@ public class ArtifactItem {
 	 * @param stagingDirectory
 	 *            The stagingDirectory to set.
 	 */
-	public final void setStagingDirectory(final String stagingDirectory) {
+	public void setStagingDirectory(final String stagingDirectory) {
 		this.stagingDirectory = filterEmptyString(stagingDirectory);
 	}
 
 	/**
 	 * @return Returns the source URL to download the artifact.
 	 */
-	public final String getDownloadUrl() {
+	public String getDownloadUrl() {
 		return replaceTokens(downloadUrl);
 	}
 
@@ -336,14 +341,14 @@ public class ArtifactItem {
 	 * @param downloadUrl
 	 *            Set the URL to download the artifact from.
 	 */
-	public final void setDownloadUrl(final String downloadUrl) {
+	public void setDownloadUrl(final String downloadUrl) {
 		this.downloadUrl = filterEmptyString(downloadUrl);
 	}
 
 	/**
 	 * @return Returns the timeout in millis allowed for artifact download.
 	 */
-	public final Integer getTimeout() {
+	public Integer getTimeout() {
 		return (timeout == null || timeout <= 0) ? 5000 : timeout;
 	}
 
@@ -351,14 +356,14 @@ public class ArtifactItem {
 	 * @param timeout
 	 *            Set the timeout in millis allowed for artifact download.
 	 */
-	public final void setTimeout(final Integer timeout) {
+	public void setTimeout(final Integer timeout) {
 		this.timeout = timeout;
 	}
 
 	/**
 	 * @return Packaging.
 	 */
-	public final String getPackaging() {
+	public String getPackaging() {
 		return packaging;
 	}
 
@@ -366,14 +371,14 @@ public class ArtifactItem {
 	 * @param packaging
 	 *            Packaging.
 	 */
-	public final void setPackaging(final String packaging) {
+	public void setPackaging(final String packaging) {
 		this.packaging = filterEmptyString(packaging);
 	}
 
 	/**
 	 * @return Force.
 	 */
-	public final Boolean getForce() {
+	public boolean getForce() {
 		return force;
 	}
 
@@ -381,14 +386,14 @@ public class ArtifactItem {
 	 * @param force
 	 *            Force.
 	 */
-	public final void setForce(final Boolean force) {
+	public void setForce(final boolean force) {
 		this.force = force;
 	}
 
 	/**
 	 * @return Install.
 	 */
-	public final Boolean getInstall() {
+	public boolean getInstall() {
 		return install;
 	}
 
@@ -396,14 +401,14 @@ public class ArtifactItem {
 	 * @param install
 	 *            Install.
 	 */
-	public final void setInstall(final Boolean install) {
+	public void setInstall(final boolean install) {
 		this.install = install;
 	}
 
 	/**
 	 * @return Deploy.
 	 */
-	public final Boolean getDeploy() {
+	public boolean getDeploy() {
 		return deploy;
 	}
 
@@ -411,14 +416,14 @@ public class ArtifactItem {
 	 * @param deploy
 	 *            Deploy.
 	 */
-	public final void setDeploy(final Boolean deploy) {
+	public void setDeploy(final boolean deploy) {
 		this.deploy = deploy;
 	}
 
 	/**
 	 * @return PomFile.
 	 */
-	public final File getPomFile() {
+	public File getPomFile() {
 		return pomFile;
 	}
 
@@ -426,14 +431,14 @@ public class ArtifactItem {
 	 * @param pomFile
 	 *            PomFile.
 	 */
-	public final void setPomFile(final File pomFile) {
+	public void setPomFile(final File pomFile) {
 		this.pomFile = pomFile;
 	}
 
 	/**
 	 * @return GeneratePom.
 	 */
-	public final Boolean getGeneratePom() {
+	public boolean getGeneratePom() {
 		return generatePom;
 	}
 
@@ -441,14 +446,14 @@ public class ArtifactItem {
 	 * @param generatePom
 	 *            GeneratePom.
 	 */
-	public final void setGeneratePom(final Boolean generatePom) {
+	public void setGeneratePom(final boolean generatePom) {
 		this.generatePom = generatePom;
 	}
 
 	/**
 	 * @return CreateChecksum.
 	 */
-	public final String getCreateChecksum() {
+	public Boolean getCreateChecksum() {
 		return createChecksum;
 	}
 
@@ -456,35 +461,35 @@ public class ArtifactItem {
 	 * @param createChecksum
 	 *            CreateChecksum.
 	 */
-	public final void setCreateChecksum(final String createChecksum) {
-		this.createChecksum = filterEmptyString(createChecksum);
+	public void setCreateChecksum(final boolean createChecksum) {
+		this.createChecksum = createChecksum;
 	}
 
 	/**
 	 * @return Checksum.
 	 */
-	public final String getChecksum() {
+	public String getChecksum() {
 		return checksum;
 	}
 
 	/**
 	 * @return true is a checksum was defined.
 	 */
-	public final boolean hasChecksum() {
+	public boolean hasChecksum() {
 		return (checksum != null && !checksum.isEmpty());
 	}
 
 	/**
 	 * @return true is a checksum was defined for an extracted file.
 	 */
-	public final boolean hasExtractFileChecksum() {
+	public boolean hasExtractFileChecksum() {
 		return (hasChecksum() && extractFileChecksum != null && !extractFileChecksum.isEmpty());
 	}
 
 	/**
 	 * @return Extracted File Checksum.
 	 */
-	public final String getExtractFileChecksum() {
+	public String getExtractFileChecksum() {
 		return extractFileChecksum;
 	}
 
@@ -492,36 +497,36 @@ public class ArtifactItem {
 	 * @param checksum
 	 *            Checksum
 	 */
-	public final void setChecksum(final String checksum) {
+	public void setChecksum(final String checksum) {
 		this.checksum = filterEmptyString(checksum);
 	}
 
 	/**
-	 * @return SkipChecksumVerification.
+	 * @return centralChecksumVerification.
 	 */
-	public final Boolean getSkipChecksumVerification() {
-		return skipChecksumVerification;
+	public boolean getCentralChecksumVerification() {
+		return centralChecksumVerification;
 	}
 
 	/**
-	 * @param skipChecksumVerification
-	 *            SkipChecksumVerification.
+	 * @param centralChecksumVerification
+	 *            centralChecksumVerification.
 	 */
-	public final void setSkipChecksumVerification(final Boolean skipChecksumVerification) {
-		this.skipChecksumVerification = skipChecksumVerification;
+	public void setCentralChecksumVerification(final boolean centralChecksumVerification) {
+		this.centralChecksumVerification = centralChecksumVerification;
 	}
 
 	/**
 	 * @return ExtractFile.
 	 */
-	public final String getExtractFile() {
+	public String getExtractFile() {
 		return replaceTokens(extractFile);
 	}
 
 	/**
-	 * @return true is an extractFile was defined.
+	 * @return true if an extractFile was defined.
 	 */
-	public final boolean hasExtractFile() {
+	public boolean hasExtractFile() {
 		return (extractFile != null && !extractFile.isEmpty());
 	}
 
@@ -529,7 +534,7 @@ public class ArtifactItem {
 	 * @param extractFile
 	 *            ExtractFile
 	 */
-	public final void setExtractFile(final String extractFile) {
+	public void setExtractFile(final String extractFile) {
 		this.extractFile = filterEmptyString(extractFile);
 	}
 

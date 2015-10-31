@@ -88,8 +88,7 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
 							 * item, then use that POM file instead of
 							 * generating a new one
 							 */
-							ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact,
-								artifactItem.getPomFile());
+							ProjectArtifactMetadata pomMetadata = new ProjectArtifactMetadata(artifact, artifactItem.getPomFile());
 							artifact.addMetadata(pomMetadata);
 						} else {
 							// Dynamically create a new POM file for this artifact

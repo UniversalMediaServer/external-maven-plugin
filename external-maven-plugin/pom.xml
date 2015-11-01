@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- 
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -23,7 +23,7 @@ under the License.
     <artifactId>external-maven-plugin</artifactId>
     <version>0.1-SNAPSHOT</version>
     <name>External Dependency Maven Plugin</name>
-    <url>https://github.com/Nadahar/external-maven-plugin</url>
+    <url>https://github.com/UniversalMediaServer/external-maven-plugin</url>
     <inceptionYear>2015</inceptionYear>
     <description>This is a fork of &quot;Maven External Dependency Plugin&quot;, http://code.google.com/p/maven-external-dependency-plugin/
 
@@ -63,7 +63,7 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
     </contributors>
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/Nadahar/external-maven-plugin/issues</url>
+        <url>https://github.com/UniversalMediaServer/external-maven-plugin/issues</url>
     </issueManagement>    
 	<licenses>
 	  <license>
@@ -247,9 +247,9 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
     <!--  SOURCE CONTROL -->
 
     <scm>
-        <connection>https://github.com/Nadahar/external-maven-plugin.git</connection>
-        <developerConnection>scm:git:git://github.com/Nadahar/external-maven-plugin.git</developerConnection>
-        <url>http://github.com/Nadahar/external-maven-plugin</url>
+        <connection>scm:git:git@github.com:UniversalMediaServer/external-maven-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:UniversalMediaServerahar/external-maven-plugin.git</developerConnection>
+        <url>git@github.com:UniversalMediaServer/external-maven-plugin</url>
     </scm>
 
         

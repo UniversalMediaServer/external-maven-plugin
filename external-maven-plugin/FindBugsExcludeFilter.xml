@@ -1,0 +1,23 @@
+<FindBugsFilter>
+	<Match>
+		<!-- Exclude because the performance impact is negligible -->		
+		<Class name="com.universalmediaserver.external.AbstractExternalDependencyMojo" />
+		<Method name="downloadArtifact" />
+		<Bug pattern="DMI_COLLECTION_OF_URLS" />	
+	</Match>
+	<Match>
+		<!-- Exclude because the masking is intentional because the super class has an unwanted initialization of masked fields -->		
+		<Class name="com.universalmediaserver.external.AbstractExternalDependencyMojo" />
+		<Bug pattern="MF_CLASS_MASKS_FIELD" />	
+	</Match>
+	<Match>
+		<!-- Exclude because FindBugs doesn't understand the special Mojo initialization -->		
+		<Class name="com.universalmediaserver.external.DeployExternalDependencyMojo" />
+		<Bug pattern="NP_UNWRITTEN_FIELD" />
+	</Match>									
+	<Match>
+		<!-- Exclude because FindBugs doesn't understand the special Mojo initialization -->		
+		<Class name="com.universalmediaserver.external.DeployExternalDependencyMojo" />
+		<Bug pattern="UWF_UNWRITTEN_FIELD" />	
+	</Match>									
+</FindBugsFilter>

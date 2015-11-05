@@ -79,6 +79,8 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
         <!-- PROJECT ENCODING PROPERTIES -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <pluginPluginVersion>3.3</pluginPluginVersion>
+        <javadocPluginVersion>2.10.3</javadocPluginVersion>
     </properties>
         
     <!--  PLUGINS -->
@@ -88,14 +90,14 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
             <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.3</version>
+                <version>${pluginPluginVersion}</version>
 				<configuration>
 					<goalPrefix>external</goalPrefix>
 				</configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.4</version>
+                <version>${pluginPluginVersion}</version>
                 <configuration>                	
                     <locales>en</locales>
                     <generateSitemap>true</generateSitemap>
@@ -103,8 +105,12 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
                 </configuration>
             </plugin>
             <plugin>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.8.1</version>
+            </plugin>
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>${pluginPluginVersion}</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -118,11 +124,33 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.3</version>
+				<version>${javadocPluginVersion}</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-				    <skip>true</skip>
+					<stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>		
+					<docfilessubdirs>true</docfilessubdirs>			
+					<tagletArtifacts>
+						<tagletArtifact>
+							<groupId>org.apache.maven.plugin-tools</groupId>
+							<artifactId>maven-plugin-tools-javadoc</artifactId>
+							<version>${pluginPluginVersion}</version>
+						</tagletArtifact>
+						<tagletArtifact>
+							<groupId>org.codehaus.plexus</groupId>
+							<artifactId>plexus-component-javadoc</artifactId>
+							<version>${plexusComponentJavadocVersion}</version>
+						</tagletArtifact>
+					</tagletArtifacts>	
+					<failOnError>false</failOnError>
 				</configuration>
-			</plugin>  
+			</plugin>
          </plugins>    
          
          
@@ -285,55 +313,82 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
        <url>ftp://savage7.com/maven-external-dependency-plugin/</url>
     </site> -->
   </distributionManagement>
-  
-        
-  <!--  SITE REPORTING / DOCUMENTATION -->
-  
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>2.5.1</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-changelog-plugin</artifactId>
-      </plugin>      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-           <configLocation>${basedir}/checkstyle.xml</configLocation>
-           <suppressionsLocation>${basedir}/checkstyle-suppressions.xml</suppressionsLocation>
-           <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
-        </configuration>        
-      </plugin>      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <version>2.4</version>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.3</version>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-      </plugin>      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.6.1</version>
-        <configuration>
-          <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>
-          <show>public</show>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
-  
+
+
+	<!--  SITE REPORTING / DOCUMENTATION -->
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>${pluginPluginVersion}</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changelog-plugin</artifactId>
+				<version>2.3</version>
+			</plugin>      
+			<!-- <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>2.17</version>
+				<configuration> -->
+					<!-- <configLocation>http://github.com/checkstyle/checkstyle/blob/master/src/main/resources/google_checks.xml</configLocation> -->
+					<!-- <suppressionsLocation>${basedir}/checkstyle-suppressions.xml</suppressionsLocation>  -->
+					<!-- <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>  -->
+					<!--<checkstyleRules>
+						<module name="LineLength">
+							<property name="max" value="140"/>
+						</module>
+					</checkstyleRules>
+				</configuration>        
+			</plugin> -->      
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.3</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>3.0.2</version>
+				<configuration>
+					<excludeFilterFile>${basedir}/FindBugsExcludeFilter.xml</excludeFilterFile>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.7</version>
+			</plugin>      
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${javadocPluginVersion}</version>							
+				<configuration>
+					<stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>		
+					<docfilessubdirs>true</docfilessubdirs>			
+					<tagletArtifacts>
+						<tagletArtifact>
+							<groupId>org.apache.maven.plugin-tools</groupId>
+							<artifactId>maven-plugin-tools-javadoc</artifactId>
+							<version>${pluginPluginVersion}</version>
+						</tagletArtifact>
+						<tagletArtifact>
+							<groupId>org.codehaus.plexus</groupId>
+							<artifactId>plexus-component-javadoc</artifactId>
+							<version>${plexusComponentJavadocVersion}</version>
+						</tagletArtifact>
+					</tagletArtifacts>	
+					<failOnError>false</failOnError>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.5</version>
+			</plugin>			
+		</plugins>
+	</reporting>
 </project>

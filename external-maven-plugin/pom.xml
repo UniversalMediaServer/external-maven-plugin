@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+<!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -16,145 +16,125 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
---> 
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.universalmediaserver</groupId>
-    <artifactId>external-maven-plugin</artifactId>
-    <version>0.1-SNAPSHOT</version>
-    <name>External Dependency Maven Plugin</name>
-    <url>https://github.com/UniversalMediaServer/external-maven-plugin</url>
-    <inceptionYear>2015</inceptionYear>
-    <description>This is a fork of &quot;Maven External Dependency Plugin&quot;, http://code.google.com/p/maven-external-dependency-plugin/
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.universalmediaserver</groupId>
+	<artifactId>external-maven-plugin</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	<name>External Dependency Maven Plugin</name>
+	<url>https://github.com/UniversalMediaServer/external-maven-plugin</url>
+	<inceptionYear>2015</inceptionYear>
+	<description>This is a fork of &quot;Maven External Dependency Plugin&quot;, http://code.google.com/p/maven-external-dependency-plugin/
 
 This Maven plugin allows downloading, installing, and deploying dependency artifacts that are not stored in a Maven repository.</description>
-    <packaging>maven-plugin</packaging>
-    <developers>
-        <developer>
-        	<name>Nadahar</name>
-        	<timezone>1</timezone>
-        	<url>https://github.com/Nadahar</url>
-        </developer>
-    </developers>
-    <contributors>
-      <contributor>
-        <name>Robert Savage</name>
-        <email>robert@savage7.com</email>
-        <roles>
-            <role>Original developer</role>
-        </roles>
-        <url>http://www.savage7.com</url>
-      </contributor>
-      <contributor>
-        <name>Marvin Froeder</name>
-        <email>velo.br@gmail.com</email>
-        <roles>
-          <role>Add support to extra compressed artifacts like bzip2, dir, gzip, tar, tgz, tar.gz, tbz2, tar.bz2</role>
-        </roles>
-      </contributor>
-      <contributor> 
-            <name>Valera Kharseko</name>
-            <email>vharseko@openam.org.ru</email>
-            <roles>
-                <role>vagon extension provider</role>
-            </roles>
-            <url>http://openam.org.ru</url>
-        </contributor>
-    </contributors>
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/UniversalMediaServer/external-maven-plugin/issues</url>
-    </issueManagement>    
+	<packaging>maven-plugin</packaging>
+	<developers>
+		<developer>
+			<name>Nadahar</name>
+			<timezone>1</timezone>
+			<url>https://github.com/Nadahar</url>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Robert Savage</name>
+			<email>robert@savage7.com</email>
+			<roles>
+				<role>Original developer</role>
+			</roles>
+			<url>http://www.savage7.com</url>
+		</contributor>
+		<contributor>
+			<name>Marvin Froeder</name>
+			<email>velo.br@gmail.com</email>
+			<roles>
+				<role>Add support to extra compressed artifacts like bzip2, dir, gzip, tar, tgz, tar.gz, tbz2, tar.bz2</role>
+			</roles>
+		</contributor>
+		<contributor> 
+			<name>Valera Kharseko</name>
+			<email>vharseko@openam.org.ru</email>
+			<roles>
+				<role>vagon extension provider</role>
+			</roles>
+			<url>http://openam.org.ru</url>
+		</contributor>
+	</contributors>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/UniversalMediaServer/external-maven-plugin/issues</url>
+	</issueManagement>    
 	<licenses>
-	  <license>
-	    <name>Apache 2</name>
-	    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-	    <distribution>repo</distribution>
-	    <comments>A business-friendly OSS license</comments>
-	  </license>
-	</licenses>    
-    
-    <!-- BUILD PROPERTIES -->
-    <properties>
-        <!-- PROJECT ENCODING PROPERTIES -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <pluginPluginVersion>3.3</pluginPluginVersion>
-        <javadocPluginVersion>2.10.3</javadocPluginVersion>
-    </properties>
-        
-    <!--  PLUGINS -->
-    
-    <build>
-         <plugins>
-            <plugin>
+		<license>
+			<name>Apache 2</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+
+	<!-- BUILD PROPERTIES -->
+	<properties>
+		<!-- PROJECT ENCODING PROPERTIES -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<pluginPluginVersion>3.3</pluginPluginVersion>
+		<javadocPluginVersion>2.10.3</javadocPluginVersion>
+	</properties>
+
+	<!-- PLUGINS -->
+
+	<build>
+		<plugins>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>${pluginPluginVersion}</version>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>${pluginPluginVersion}</version>
 				<configuration>
 					<goalPrefix>external</goalPrefix>
 				</configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>${pluginPluginVersion}</version>
-                <configuration>                	
-                    <locales>en</locales>
-                    <generateSitemap>true</generateSitemap>
-                    <generateReports>true</generateReports>                        
-                </configuration>
-            </plugin>
-            <plugin>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.8.1</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${pluginPluginVersion}</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
-            </plugin>
+			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${javadocPluginVersion}</version>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>${pluginPluginVersion}</version>
 				<configuration>
-					<stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>		
-					<docfilessubdirs>true</docfilessubdirs>			
-					<tagletArtifacts>
-						<tagletArtifact>
-							<groupId>org.apache.maven.plugin-tools</groupId>
-							<artifactId>maven-plugin-tools-javadoc</artifactId>
-							<version>${pluginPluginVersion}</version>
-						</tagletArtifact>
-						<tagletArtifact>
-							<groupId>org.codehaus.plexus</groupId>
-							<artifactId>plexus-component-javadoc</artifactId>
-							<version>${plexusComponentJavadocVersion}</version>
-						</tagletArtifact>
-					</tagletArtifacts>	
-					<failOnError>false</failOnError>
+					<locales>en</locales>
+					<generateSitemap>true</generateSitemap>
+					<generateReports>true</generateReports>
 				</configuration>
 			</plugin>
-         </plugins>    
-         
-         
-	     <extensions>
+			<plugin>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.8.1</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${pluginPluginVersion}</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.6</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+		 </plugins> 
+ 
+		 <extensions>
 			<!-- 
 				Only one of the wagon providers is needed, depending on the protocol used to upload the plugin
 				to the repository. wagon-ftp supports ftp and wagon-ssh supports sftp and scp. 
@@ -169,150 +149,168 @@ This Maven plugin allows downloading, installing, and deploying dependency artif
 				<artifactId>wagon-ssh</artifactId>
 				<version>2.10</version>
 			</extension>
-	    </extensions>
+		</extensions>
+	</build>
 
-    </build>
-    
-    <!--  PROJECT PROFILES -->
-    
+	<!--  PROJECT PROFILES -->
+
 	<profiles>
-	  <profile>
-	    <id>release-sign-artifacts</id>
-	    <activation>
-	      <property>
-	        <name>performRelease</name>
-	        <value>true</value>
-	      </property>
-	    </activation>
-	    <build>
-	      <plugins>
-	        <plugin>
-	          <groupId>org.apache.maven.plugins</groupId>
-	          <artifactId>maven-gpg-plugin</artifactId>
-	          <executions>
-	            <execution>
-	              <id>sign-artifacts</id>
-	              <phase>verify</phase>
-	              <goals>
-	                <goal>sign</goal>
-	              </goals>
-	            </execution>
-	          </executions>
-	        </plugin>
-	      </plugins>
-	    </build>
-	  </profile>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.4</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${javadocPluginVersion}</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>		
+							<docfilessubdirs>true</docfilessubdirs>			
+							<tagletArtifacts>
+								<tagletArtifact>
+									<groupId>org.apache.maven.plugin-tools</groupId>
+									<artifactId>maven-plugin-tools-javadoc</artifactId>
+									<version>${pluginPluginVersion}</version>
+								</tagletArtifact>
+								<tagletArtifact>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-component-javadoc</artifactId>
+									<version>${plexusComponentJavadocVersion}</version>
+								</tagletArtifact>
+							</tagletArtifacts>	
+							<failOnError>false</failOnError>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 
-    <!--  PROJECT DEPENDENCIES-->
+	<!--  PROJECT DEPENDENCIES-->
 
-    <dependencies>
-	    <dependency>
-	      <groupId>org.apache.maven</groupId>
-	      <artifactId>maven-plugin-api</artifactId>
-	      <version>3.3.3</version>
-	      <scope>provided</scope>
-	    </dependency>
-	    <dependency>
-	      <groupId>org.apache.maven</groupId>
-	      <artifactId>maven-project</artifactId>
-	      <version>2.2.1</version>
-	      <scope>provided</scope>
-	    </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-utils</artifactId>
-          <version>3.0.22</version>
-        </dependency>
-        <dependency>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-digest</artifactId>
-          <version>1.1</version>
-        </dependency>        
-        <dependency>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>        
-        </dependency>        
-        <dependency>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>        
-        </dependency>     
-        <dependency>
-          <groupId>org.codehaus.plexus</groupId>
-          <artifactId>plexus-archiver</artifactId>
-          <version>3.0.1</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.maven</groupId>
-        	<artifactId>maven-settings</artifactId>
-        	<version>3.3.3</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.maven.wagon</groupId>
-        	<artifactId>wagon-provider-api</artifactId>
-        	<version>2.10</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.maven</groupId>
-        	<artifactId>maven-compat</artifactId>
-        	<version>3.3.3</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.maven</groupId>
-        	<artifactId>maven-settings-builder</artifactId>
-        	<version>3.3.3</version>
-        </dependency>
-    </dependencies>
-    
-    <!--  SOURCE CONTROL -->
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>3.3.3</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-project</artifactId>
+			<version>2.2.1</version>
+			<scope>provided</scope>
+		</dependency> -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>3.0.22</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-digest</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-install-plugin</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-deploy-plugin</artifactId>
+			<version>2.8.2</version>        
+		</dependency> -->     
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-archiver</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-settings</artifactId>
+			<version>3.3.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.wagon</groupId>
+			<artifactId>wagon-provider-api</artifactId>
+			<version>2.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-compat</artifactId>
+			<version>3.3.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-settings-builder</artifactId>
+			<version>3.3.3</version>
+		</dependency>
+	</dependencies>
 
-    <scm>
-        <connection>scm:git:git@github.com:UniversalMediaServer/external-maven-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:UniversalMediaServerahar/external-maven-plugin.git</developerConnection>
-        <url>git@github.com:UniversalMediaServer/external-maven-plugin</url>
-    </scm>
+	<!--  SOURCE CONTROL -->
 
-        
-  <!--  MAVEN DEPLOYMENT REPOSITORY -->
-  
-  <distributionManagement>
+	<scm>
+		<connection>scm:git:git@github.com:UniversalMediaServer/external-maven-plugin.git</connection>
+		<developerConnection>scm:git:git@github.com:UniversalMediaServer/external-maven-plugin.git</developerConnection>
+		<url>git@github.com:UniversalMediaServer/external-maven-plugin</url>
+	</scm>
+
+
+	<!--  MAVEN DEPLOYMENT REPOSITORY -->
+
+	<distributionManagement>
 	<!-- 
 		Repository to be uploaded to during the deploy phase. Ftp, sftp and scp are supported.
 		The "id" parameter must match a "server" entry in Maven configuration (e.g. ~/.m2/settings.xml)
 		where username and password are provided.  
 	-->
-    <repository>
-      <id>superbum.org</id>
-      <url>sftp://sftp.domeneshop.no/home/4/s/superbum/www/downloads/maven</url>
-    </repository>
-    <!-- <repository>
-	  <id>universalmediaserver.com</id>
-	  <url>sftp://universalmediaserver.com</url>
-    </repository> -->  
-    <!-- <repository>
-       <id>ossrh</id>
-       <name>Sonatype OSS Repository</name>
-       <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-    </repository>
-    <snapshotRepository>
-       <id>ossrh</id>
-       <name>Sonatype OSS Repository</name>
-       <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <site>
-       <id>savage7-site-docs</id>
-       <name>Savage7 Site Docs</name>
-       <url>ftp://savage7.com/maven-external-dependency-plugin/</url>
-    </site> -->
-  </distributionManagement>
+		<snapshotRepository>
+		  <id>ossrh</id>
+		  <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 
 	<!--  SITE REPORTING / DOCUMENTATION -->

@@ -27,8 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
  *
  * @goal resolve
  * @phase generate-sources
- * @category Maven Plugin
- * @ThreadSafe
+ * @threadSafe
  */
 public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
@@ -86,7 +85,9 @@ public class ResolveExternalDependencyMojo extends AbstractExternalDependencyMoj
 			// We're done with the temporary files so lets delete them
 			for (File tempDownloadFile : cachedDownloads.values()) {
 				getLog().debug("Deleting file: " + tempDownloadFile.getAbsolutePath());
-				tempDownloadFile.delete();
+				if (!tempDownloadFile.delete()) {
+					getLog().warn("Could not delete temporary file: " + tempDownloadFile.getAbsolutePath());
+				}
 			}
 		}
 

@@ -29,7 +29,6 @@ import org.codehaus.plexus.util.StringUtils;
  *
  * The annotations is kept to improve readability though
  */
-
 public class ArtifactItem {
 
 	/**
@@ -348,8 +347,8 @@ public class ArtifactItem {
 	/**
 	 * @return Returns the timeout in millis allowed for artifact download.
 	 */
-	public Integer getTimeout() {
-		return (timeout == null || timeout <= 0) ? 5000 : timeout;
+	public int getTimeout() {
+		return timeout == null || timeout <= 0 ? 5000 : timeout;
 	}
 
 	/**
@@ -476,14 +475,14 @@ public class ArtifactItem {
 	 * @return true is a checksum was defined.
 	 */
 	public boolean hasChecksum() {
-		return (checksum != null && !checksum.isEmpty());
+		return checksum != null && !checksum.isEmpty();
 	}
 
 	/**
-	 * @return true is a checksum was defined for an extracted file.
+	 * @return true if a checksum was defined for an extracted file.
 	 */
 	public boolean hasExtractFileChecksum() {
-		return (hasChecksum() && extractFileChecksum != null && !extractFileChecksum.isEmpty());
+		return hasChecksum() && extractFileChecksum != null && !extractFileChecksum.isEmpty();
 	}
 
 	/**
@@ -491,6 +490,10 @@ public class ArtifactItem {
 	 */
 	public String getExtractFileChecksum() {
 		return extractFileChecksum;
+	}
+
+	public void setExtractFileChecksum(final String extractFileChecksum) {
+		this.extractFileChecksum = filterEmptyString(extractFileChecksum);
 	}
 
 	/**
@@ -527,7 +530,7 @@ public class ArtifactItem {
 	 * @return true if an extractFile was defined.
 	 */
 	public boolean hasExtractFile() {
-		return (extractFile != null && !extractFile.isEmpty());
+		return extractFile != null && !extractFile.isEmpty();
 	}
 
 	/**

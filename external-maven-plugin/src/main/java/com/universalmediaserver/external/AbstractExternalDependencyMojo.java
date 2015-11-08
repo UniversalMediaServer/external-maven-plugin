@@ -87,8 +87,7 @@ import org.xml.sax.SAXException;
 /**
  * Base class for all goals in this plugin.
  *
- * @category Maven Plugin
- * @ThreadSafe
+ * @threadSafe
  */
 public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo {
 
@@ -133,6 +132,8 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	protected List<ArtifactRepository> remoteRepositories;
 
 	/**
+	 * Maven WagonManager
+	 *
 	 * @component role="org.apache.maven.artifact.manager.WagonManager"
 	 * @required
 	 * @readonly
@@ -140,12 +141,16 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	protected WagonManager wagonManager;
 
 	/**
+	 * Maven ArchieverManager.
+	 *
 	 * @component
 	 * @readonly
 	 */
 	protected ArchiverManager archiverManager;
 
 	/**
+	 * Maven project
+	 *
 	 * @parameter default-value="${project}"
 	 * @required
 	 * @readonly
@@ -153,18 +158,24 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	protected MavenProject project;
 
 	/**
+	 * Path to user settings.xml
+	 *
 	 * @parameter default-value="${user.home}/.m2/settings.xml"
 	 * @required
 	 */
 	protected String userSettings;
 
 	/**
+	 * Path to global settings.xml
+	 *
 	 * @parameter default-value="${env.M2_HOME}/conf/settings.xml"
 	 * @required
 	 */
 	protected String globalSettings;
 
 	/**
+	 * Maven local repository
+	 *
 	 * @parameter default-value="${localRepository}"
 	 * @required
 	 * @readonly
@@ -172,6 +183,8 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	protected ArtifactRepository localRepository;
 
 	/**
+	 * Staging directory for external dependencies
+	 *
 	 * @parameter default-value="${project.build.directory}"
 	 */
 	protected String stagingDirectory;
@@ -200,6 +213,9 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 */
 	protected boolean createChecksum;
 
+	/**
+	 * Newline constant
+	 */
 	protected final String NEWLINE = System.getProperty("line.separator");
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
@@ -208,9 +224,9 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	}
 
 	/**
-	 * Create Maven Artifact object from ArtifactItem configuration descriptor
+	 * Create Maven Artifact object from ArtifactItem configuration descriptor.
 	 *
-	 * @param item
+	 * @param item the item
 	 * @return Artifact
 	 */
 	protected Artifact createArtifact(ArtifactItem item) {
@@ -228,9 +244,9 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * responsibility of the caller to delete the generated file when no longer
 	 * needed.
 	 *
+	 * @param artifact the artifact
 	 * @return The path to the generated POM file, never <code>null</code>.
-	 * @throws MojoExecutionException
-	 *             If the POM file could not be generated.
+	 * @throws MojoExecutionException             If the POM file could not be generated.
 	 */
 	protected File generatePomFile(ArtifactItem artifact) throws MojoExecutionException {
 		Model model = generateModel(artifact);
@@ -253,6 +269,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	/**
 	 * Generates a minimal model from the user-supplied artifact information.
 	 *
+	 * @param artifact the artifact
 	 * @return The generated model, never <code>null</code>.
 	 */
 	protected Model generateModel(ArtifactItem artifact) {
@@ -268,8 +285,9 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 
 	/**
 	 * Resolves the file path and returns a file object instance for an artifact
-	 * item
+	 * item.
 	 *
+	 * @param artifactItem the artifact item
 	 * @return File object for artifact item
 	 */
 	protected File getFullyQualifiedArtifactFilePath(ArtifactItem artifactItem) {
@@ -283,11 +301,11 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	/**
 	 * Verifies a checksum for the specified file.
 	 *
-	 * @param targetFile
-	 *            The path to the file from which the checksum is verified, must
-	 *            not be <code>null</code>.
-	 * @param digester
-	 *            The checksum algorithm to use, must not be <code>null</code>.
+	 * @param targetFile the path to the file from which the checksum is
+	 * verified, must not be <code>null</code>.
+	 * @param digester the checksum algorithm to use, must not be <code>null</code>.
+	 * @param checksum the checksum to verify.
+	 * @return The result
 	 * @throws MojoExecutionException
 	 *             If the checksum could not be installed.
 	 */
@@ -297,7 +315,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 			String calculatedChecksum = digester.calc(targetFile);
 			getLog().debug("Generated checksum : " + calculatedChecksum);
 			getLog().debug("Expected checksum  : " + checksum);
-			return (calculatedChecksum.equals(checksum));
+			return calculatedChecksum.equals(checksum);
 		} catch (DigesterException e) {
 			throw new MojoExecutionException("Failed to calculate " + digester.getAlgorithm() + " checksum for "
 				+ targetFile, e);
@@ -307,13 +325,10 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	/**
 	 * Validate artifact configured checksum against specified file.
 	 *
-	 * @param artifactItem
-	 *            to validate checksum against
-	 * @param targetFile
-	 *            to validate checksum against
-	 * @throws MojoExecutionException
-	 * @throws MojoFailureException
-	 * @throws IOException
+	 * @param artifactItem to validate checksum against
+	 * @param targetFile to validate checksum against
+	 * @throws MojoExecutionException the mojo execution exception
+	 * @throws MojoFailureException the mojo failure exception
 	 */
 	protected void verifyArtifactItemChecksum(ArtifactItem artifactItem, File targetFile) throws MojoExecutionException, MojoFailureException {
 
@@ -355,13 +370,10 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * Validate artifact configured extracted file checksum against specified
 	 * file.
 	 *
-	 * @param artifactItem
-	 *            to validate checksum against
-	 * @param targetFile
-	 *            to validate checksum against
-	 * @throws MojoExecutionException
-	 * @throws MojoFailureException
-	 * @throws IOException
+	 * @param artifactItem to validate checksum against
+	 * @param targetFile to validate checksum against
+	 * @throws MojoExecutionException MojoExecutionException
+	 * @throws MojoFailureException MojoFailureException
 	 */
 	protected void verifyArtifactItemExtractFileChecksum(ArtifactItem artifactItem, File targetFile) throws MojoExecutionException, MojoFailureException {
 
@@ -429,13 +441,10 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 *
 	 * @since 0.1
 	 *
-	 * @param artifactItem
-	 *            to validate checksum against
-	 * @param targetFile
-	 *            to validate checksum against
-	 * @throws MojoExecutionException
-	 * @throws MojoFailureException
-	 * @throws IOException
+	 * @param artifactItem to validate checksum against
+	 * @param targetFile to validate checksum against
+	 * @throws MojoExecutionException MojoExecutionException
+	 * @throws MojoFailureException MojoFailureException
 	 */
 	protected void verifyArtifactItemChecksumByCentralLookup(ArtifactItem artifactItem, File targetFile)
 		throws MojoExecutionException, MojoFailureException {
@@ -486,14 +495,15 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 			NodeList resultNodes = document.getElementsByTagName("result");
 			for (int i = 0; i < resultNodes.getLength(); i++) {
 				Node node = resultNodes.item(i);
-				if (hasAttribute(node, "name") && hasAttribute(node, "numFound")) {
-					if (getAttribute(node, "name").equalsIgnoreCase("response")) {
-						try {
-							nodeCount = Integer.valueOf(getAttribute(node, "numFound"));
-							break;
-						} catch (NumberFormatException e) {
-							nodeCount = 0;
-						}
+				if (
+					hasAttribute(node, "name") && hasAttribute(node, "numFound") &&
+					getAttribute(node, "name").equalsIgnoreCase("response")
+				) {
+					try {
+						nodeCount = Integer.parseInt(getAttribute(node, "numFound"));
+						break;
+					} catch (NumberFormatException e) {
+						nodeCount = 0;
 					}
 				}
 			}
@@ -550,17 +560,18 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 									 artifactProperty.getTextContent() + " != " + artifactItem.getGroupId());
 								artifactMismatch = true;
 							}
-						} else if (propertyName.equalsIgnoreCase("v")) {
+						} else if (
+							propertyName.equalsIgnoreCase("v") &&
+							!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getVersion())
+						) {
 							/*
 							 * Attempt to validate the returned artifact's
 							 * Version against the target install artifact
 							 */
-							if (!artifactProperty.getTextContent().equalsIgnoreCase(artifactItem.getVersion())) {
-								getLog().error(
-									"Artifact version found in Central Repository lookup does not match: " +
-									artifactProperty.getTextContent() + " != " + artifactItem.getVersion());
-								artifactMismatch = true;
-							}
+							getLog().error(
+								"Artifact version found in Central Repository lookup does not match: " +
+								artifactProperty.getTextContent() + " != " + artifactItem.getVersion());
+							artifactMismatch = true;
 						}
 					}
 				}
@@ -624,7 +635,6 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * @param artifact the artifact to resolve
 	 * @return
 	 * 			Whether or not the artifact was resolved
-	 * @throws MojoFailureException
 	 */
 	protected boolean resolveArtifactItem(Artifact artifact) {
 		// Determine if the artifact is already installed in an existing Maven repository
@@ -635,6 +645,16 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 		return artifactResolver.resolve(request).isSuccess();
 	}
 
+	/**
+	 * Download an artifact.
+	 *
+	 * @param artifactItem the artifact item
+	 * @param artifact the artifact
+	 * @param artifactFile the artifact file
+	 * @param cachedDownloads the cached downloads
+	 * @throws MojoExecutionException the mojo execution exception
+	 * @throws MojoFailureException the mojo failure exception
+	 */
 	protected void downloadArtifact(final ArtifactItem artifactItem, Artifact artifact, File artifactFile, Map<URL, File> cachedDownloads) throws MojoExecutionException, MojoFailureException {
 
 		if (artifactItem.getDownloadUrl() != null) {
@@ -746,7 +766,9 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 				);
 
 				File tempOutputDir = FileUtils.createTempFile(tempDownloadFile.getName(), ".dir", null);
-				tempOutputDir.mkdirs();
+				if (!tempOutputDir.mkdirs()) {
+					throw new MojoExecutionException("Could not create temporary folder: " + tempOutputDir.getAbsolutePath());
+				}
 				File extractedFile = new File(tempOutputDir, artifactItem.getExtractFile());
 
 				UnArchiver unarchiver;
@@ -770,8 +792,8 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 
 				// Ensure the path exists to write the file to
 				File parentDirectory = artifactFile.getParentFile();
-				if (parentDirectory != null && !parentDirectory.exists()) {
-					artifactFile.getParentFile().mkdirs();
+				if (parentDirectory != null && !parentDirectory.exists() && !artifactFile.getParentFile().mkdirs()) {
+					throw new MojoExecutionException("Could not create folder: " + artifactFile.getParentFile().getAbsolutePath());
 				}
 
 				unarchiver.setSourceFile(tempDownloadFile);
@@ -839,6 +861,12 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 		}
 	}
 
+	/**
+	 * Gets the file extension.
+	 *
+	 * @param downloadURL the download url
+	 * @return the extension
+	 */
 	protected String getExtension(URL downloadURL) {
 		String path = downloadURL.getPath();
 		if (path.endsWith(".tar.gz")) {
@@ -850,6 +878,11 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 		return FileUtils.getExtension(path);
 	}
 
+	/**
+	 * Looks up ProxyInfo from Maven settings.
+	 *
+	 * @return ProxyInfo
+	 */
 	protected ProxyInfo getProxyInfo() {
 		ProxyInfo proxyInfo = null;
 		try {
@@ -873,6 +906,14 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 		return proxyInfo;
 	}
 
+	/**
+	 * Verify artifact.
+	 *
+	 * @param artifactItem the artifact item
+	 * @param stagedArtifactFile the staged artifact file
+	 * @throws MojoExecutionException the mojo execution exception
+	 * @throws MojoFailureException the mojo failure exception
+	 */
 	protected void verifyArtifact(ArtifactItem artifactItem, File stagedArtifactFile) throws MojoExecutionException, MojoFailureException {
 
 		if (artifactItem.hasExtractFile()) {
@@ -912,11 +953,12 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 
 	/**
 	 * Install an artifact into the local repository
+	 *
 	 * @param artifactItem the current <code>ArtifactItem</code>
 	 * @param artifact the <code>Artifact</code> representing the <code>ArtifactItem</code>
-	 * @param stagedArtifactFile the <code>File<code> representing the staged
+	 * @param stagedArtifactFile the <code>File</code> representing the staged
 	 * location for the <code>ArtifactItem</code>
-	 * @throws MojoExecutionException
+	 * @throws MojoExecutionException MojoExecutionException
 	 */
 	protected void installArtifact(ArtifactItem artifactItem, Artifact artifact, File stagedArtifactFile) throws MojoExecutionException {
 

@@ -28,8 +28,7 @@ import org.apache.maven.project.artifact.ProjectArtifactMetadata;
  *
  * @goal deploy
  * @phase deploy
- * @category Maven Plugin
- * @ThreadSafe
+ * @threadSafe
  */
 public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo {
 
@@ -72,8 +71,8 @@ public class DeployExternalDependencyMojo extends AbstractExternalDependencyMojo
 					if (protocol.equalsIgnoreCase("scp")) {
 						File sshFolder = new File(System.getProperty("user.home"), ".ssh");
 
-						if (!sshFolder.exists()) {
-							sshFolder.mkdirs();
+						if (!sshFolder.exists() && !sshFolder.mkdirs()) {
+							throw new MojoExecutionException("Could not create folder: " + sshFolder.getAbsolutePath());
 						}
 					}
 

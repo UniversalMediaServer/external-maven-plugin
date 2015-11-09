@@ -27,6 +27,7 @@ import org.apache.maven.plugin.MojoFailureException;
  *
  * @goal install
  * @phase generate-sources
+ * @phase clean
  * @threadSafe
  */
 public class InstallExternalDependencyMojo extends AbstractExternalDependencyMojo {

@@ -70,15 +70,14 @@ public class ArtifactItem {
 	private String localFile = "{artifactId}-{version}-{classifier}.{packaging}";
 
 	/**
-	 * URL to download artifact from.
+	 * Folder to download the artifact to.
 	 *
 	 * @parameter
-	 * @required
 	 */
 	private String stagingDirectory;
 
 	/**
-	 * URL to download artifact from.
+	 * URL to download the artifact from.
 	 *
 	 * @parameter
 	 */

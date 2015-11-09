@@ -127,7 +127,6 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 *
 	 * @parameter default-value="${project.remoteArtifactRepositories}"
 	 * @readonly
-	 * @required
 	 */
 	protected List<ArtifactRepository> remoteRepositories;
 
@@ -185,7 +184,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	/**
 	 * Staging directory for external dependencies
 	 *
-	 * @parameter default-value="${project.build.directory}"
+	 * @parameter default-value="${project.build.directory}/external-dependencies"
 	 */
 	protected String stagingDirectory;
 

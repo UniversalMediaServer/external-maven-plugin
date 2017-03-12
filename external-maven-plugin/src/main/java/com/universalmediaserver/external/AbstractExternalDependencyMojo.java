@@ -24,9 +24,15 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -205,7 +211,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	protected boolean centralChecksumVerification;
 
 	/**
-	 * Flag whether to create checksums (MD5, SHA-1) or not.
+	 * Flag that indicates whether to create checksums (MD5, SHA-1) or not.
 	 *
 	 * @parameter property="createChecksum" default-value="true"
 	 * @required
@@ -213,13 +219,33 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	protected boolean createChecksum;
 
 	/**
+	 * Flag that indicates whether to disable Java's SSL certificate and host validation.
+	 *
+	 * @parameter property="disableSSLValidation" default-value="false"
+	 */
+	protected boolean disableSSLValidation;
+
+	/**
 	 * Newline constant
 	 */
 	protected final String NEWLINE = System.getProperty("line.separator");
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		// Super class lack a default value and requires it to be set manually
 		super.localRepository = this.localRepository;
+
+		if (disableSSLValidation) {
+			try {
+				SSLContext sslContext = SSLContext.getInstance("SSL");
+			    sslContext.init(null, new TrustManager[] { new GullableTrustManager() }, new SecureRandom());
+			    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+			    HttpsURLConnection.setDefaultHostnameVerifier(new GullableHostnameVerifier());
+			} catch (NoSuchAlgorithmException | KeyManagementException e) {
+				getLog().warn("Disabling of SSL verification failed: " + e.getMessage());
+				getLog().debug(e);
+			}
+		}
 	}
 
 	/**
@@ -492,7 +518,8 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 
 			int nodeCount = 0;
 			NodeList resultNodes = document.getElementsByTagName("result");
-			for (int i = 0; i < resultNodes.getLength(); i++) {
+			int resultNodesLength = resultNodes.getLength();
+			for (int i = 0; i < resultNodesLength; i++) {
 				Node node = resultNodes.item(i);
 				if (
 					hasAttribute(node, "name") && hasAttribute(node, "numFound") &&
@@ -519,7 +546,8 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 			 * attempt to determine if any of the returned artifact GAV do
 			 * no match the GAV of the attempted install artifact.
 			 */
-			for (int index = 0; index < artifactList.getLength(); index++) {
+			int artifactListLength = artifactList.getLength();
+			for (int index = 0; index < artifactListLength; index++) {
 				Node artifactNode = artifactList.item(index);
 				if (artifactNode.hasChildNodes()) {
 					NodeList children = artifactNode.getChildNodes();

@@ -4,7 +4,7 @@ This Maven plugin can be used to manage external dependencies that are not avail
 
 This is a fork of [com.savage7.maven.plugins:maven-external-dependency-plugin] (https://code.google.com/p/maven-external-dependency-plugin/) that is updated for Maven 3.x. Its use has also been simplified slightly.
 
-Maven 3.x introduced changes in dependency resolution that makes it impossible for this plugin to function optimally. In Maven 3.x all dependencies are resolved before the lifecycle phases are started, making it impossible for this plugin to download and install the external dependencies before Maven resolves the project's dependencies. Any dependencies needed during the build lifecycle, e.g. for the compile phase, must be resolved before Maven will start the lifecycle. That means that the external dependencies must be given as dependencies in ```pom.xml```, or the compile phase will fail. At the same time, including them as dependencies prevents Maven from starting the lifecycle as the dependencies can not be resolved.
+Maven 3.x introduced changes in dependency resolution that makes it impossible for this plugin to function optimally. In Maven 3.x all dependencies are resolved before the lifecycle phases are started, making it impossible for a plugin to download and install the external dependencies before Maven resolves the project's dependencies. Any dependencies needed during the build lifecycle, e.g. for the compile phase, must be resolved before Maven will start the lifecycle. That means that the external dependencies must be given as dependencies in ```pom.xml```, or the compile phase will fail. At the same time, including them as dependencies prevents Maven from starting the lifecycle as the dependencies can not be resolved.
 
 There are multiple ways  to get around this, but none of them are as elegant as if this plugin could run before dependency resolution (as is possible in Maven 2.x). Basicly, there are 3 options:
 * Run this plugin from a parent POM so that the dependencies are already installed when the child POM starts.
@@ -147,6 +147,7 @@ The plugin configuration is done in the ```configuration``` for the plugin like 
 **force** | No | False | Should download, install and deploy be forced for all external dependencies? Force means that the action is performed even though it's deemed not necessary. 
 **centralChecksumVerification** | No | False | If this is true, the downloaded files' checksums will be verified with queries against Maven central repository to make sure the artifacts aren't already there.
 **createChecksum** | No | True | Should MD5 and SHA-1 checksums be generated for the artifacts during installation and deployment?
+**disableSSLValidation** | No | False | Should SSL/HTTPS validation be disabled when downloading external dependencies?
 **remoteRepositories** | No |  | A list of remote repositories to be used when resolving external dependencies.
 **artifactItems** | **Yes** |  | A list of ```artifactItems``` for this plugin as described above.
 

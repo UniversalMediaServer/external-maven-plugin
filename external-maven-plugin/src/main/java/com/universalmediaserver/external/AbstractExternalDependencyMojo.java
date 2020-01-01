@@ -55,6 +55,7 @@ import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilder;
+import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
@@ -633,11 +634,7 @@ public abstract class AbstractExternalDependencyMojo extends AbstractInstallMojo
 	 * 			The SettingsBuilder instance
 	 */
 	public SettingsBuilder getSettingsBuilder() {
-		DefaultSettingsBuilder settingsBuilder = new DefaultSettingsBuilder();
-		settingsBuilder.setSettingsReader(new DefaultSettingsReader());
-		settingsBuilder.setSettingsValidator(new DefaultSettingsValidator());
-		settingsBuilder.setSettingsWriter(new DefaultSettingsWriter());
-		return settingsBuilder;
+		return new DefaultSettingsBuilderFactory().newInstance();
 	}
 
 	/**
